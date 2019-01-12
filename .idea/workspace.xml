@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="24c2d590-0fa3-40e7-b10f-700cfd734048" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Samples/cube_sample.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Samples/Cube/CubeWindow.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TUL.ICP.Bomberman.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/Program.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/camera.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/camera_system_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/camera_system_1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/cube.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/cube.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/cviceni.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/cviceni.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/grey_texture.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/grey_texture.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/particles.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/particles.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/texture_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/texture_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/PySamples/window.py" beforeDir="false" afterPath="$PROJECT_DIR$/Samples/window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/Samples.csproj" beforeDir="false" />
-    </list>
+    <list default="true" id="24c2d590-0fa3-40e7-b10f-700cfd734048" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/samples/cube_sample.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="10" lean-forward="true" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
+            <state relative-caret-position="255">
+              <caret line="17" column="9" lean-forward="true" selection-start-line="17" selection-start-column="9" selection-end-line="17" selection-end-column="9" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -207,8 +191,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/samples/cube_sample.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" column="10" lean-forward="true" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
+        <state relative-caret-position="255">
+          <caret line="17" column="9" lean-forward="true" selection-start-line="17" selection-start-column="9" selection-end-line="17" selection-end-column="9" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
