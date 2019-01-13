@@ -1,0 +1,35 @@
+{
+  "name": "Template Map",
+  "dimension": {
+    "width": 8,
+    "height": 8
+  },
+  "border": {
+    "color": "#000",
+    "texture": "img/border-texture.png"
+  },
+  "floor": {
+    "color": "#FFF",
+    "texture": "img/floor-texture.png"
+  },
+  "cube-styles": [
+    {
+      "id": 1,
+      "color": "#c7c8ca"
+    },
+    {
+      "id": 2,
+      "color": "#000"
+    }
+  ],
+  "cubes": [
+    {
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "style-id": 1,
+      "is-solid": true
+    }
+  ]
+}
