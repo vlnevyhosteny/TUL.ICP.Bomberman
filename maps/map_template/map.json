@@ -6,11 +6,16 @@
     "color": "#000",
     "texture": "img/border-texture.png"
   },
-  "floor": {
-    "color": "#FFF",
-    "texture": "img/floor-texture.png"
-  },
-  "cube-styles": [
+  "floor_cubes": [
+    {
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "style_id": 1,
+    }
+  ],
+  "cube_styles": [
     {
       "id": 1,
       "color": "#c7c8ca"
@@ -26,8 +31,8 @@
         "x": 0,
         "y": 0
       },
-      "style-id": 1,
-      "is-solid": true
+      "style_id": 1,
+      "is_solid": true
     }
   ]
 }
