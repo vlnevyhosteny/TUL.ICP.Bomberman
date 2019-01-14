@@ -1,11 +1,26 @@
 import json
 
+from pathlib import Path
+
 from src.map.border import Border
 from src.map.cube import Cube
 from src.map.cube_style import CubeStyle
 from src.map.field_cube import FieldCube
 from src.map.floor_cube import FloorCube
 from src.map.map import Map
+
+
+def parse_map_from_folder(path_to_folder):
+    maps = []
+
+    path_list = Path(path_to_folder).glob('**/*.json')
+    for path in path_list:
+        game_map = parse_map_from_json_file(path)
+
+        if game_map is not None:
+            maps.append(game_map)
+
+    return maps
 
 
 def parse_map_from_json_file(path_to_json):
