@@ -1,9 +1,7 @@
 {
   "name": "Base Map",
-  "dimension": {
-    "width": 8,
-    "height": 8
-  },
+  "width": 8,
+  "height": 8,
   "border": {
     "color": "#000",
     "texture": "img/border-texture.png"
