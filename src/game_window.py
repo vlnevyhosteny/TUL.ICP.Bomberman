@@ -1,59 +1,32 @@
 from pyglet.gl import *
-from pyglet.window import key
-from OpenGL.GLUT import *
 
-INCREMENT = 5
+from src.config.map_config import MapConfig
+from src.config.window_config import WindowConfig
+from src.map.map_drawer import draw_map
+from src.map.map_json_parser import parse_map_from_folder
 
 class GameWindow(pyglet.window.Window):
-
-    x_rotation = y_rotation = 30
 
     def __init__(self, window_config, *args, **kwargs):
         super().__init__(resizable=window_config.IS_RESIZEABLE, *args, **kwargs)
         self.window_config = window_config
         self.set_minimum_size(window_config.WIDTH, window_config.HEIGHT)
 
+        self.maps = parse_map_from_folder('maps')
+        self.selected_map = self.maps[0]
+
         glClearColor(0.2, 0.3, 0.2, 1.0)
         glEnable(GL_DEPTH_TEST)
+
+        pyglet.clock.schedule_interval(self.update, 1.0 / WindowConfig.TICKS_PER_SEC)
 
     def on_draw(self):
         # Clear the current GL Window
         self.clear()
 
-        # Push Matrix onto stack
-        glPushMatrix()
+        # draw_map(self.selected_map, MapConfig)
 
-        glRotatef(self.x_rotation, 1, 0, 0)
-        glRotatef(self.y_rotation, 0, 1, 0)
-
-        # Draw the six sides of the cube
-        glBegin(GL_QUADS)
-
-        glColor4f(1.0, 0, 0, 1.0)
-
-        # White
-        glColor3ub(255, 255, 255)
-        glVertex3f(50, 50, 50)
-
-        # Yellow
-        glColor3ub(255, 255, 0)
-        glVertex3f(50, -50, 50)
-
-        # Red
-        glColor3ub(255, 0, 0)
-        glVertex3f(-50, -50, 50)
-        glVertex3f(-50, 50, 50)
-
-        # Blue
-        glColor3f(0, 0, 1)
-        glVertex3f(-50, 50, -50)
-
-        #
-
-        glEnd()
-
-        # Pop Matrix off stack
-        glPopMatrix()
+        pass
 
     def on_resize(self, width, height):
         # set the Viewport
@@ -63,8 +36,8 @@ class GameWindow(pyglet.window.Window):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
 
-        aspectRatio = width / height
-        gluPerspective(35, aspectRatio, 1, 1000)
+        aspect_ratio = width / height
+        gluPerspective(35, aspect_ratio, 1, 1000)
 
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
@@ -76,12 +49,12 @@ class GameWindow(pyglet.window.Window):
     #     pyglet.gl.glLoadIdentity()
     #     pyglet.gl.gluPerspective(45.0, float(self.window_config.WIDTH) / self.window_config.HEIGHT, 0.1, 360)
 
-    def on_text_motion(self, motion):
-        if motion == key.UP:
-            self.x_rotation -= INCREMENT
-        elif motion == key.DOWN:
-            self.x_rotation += INCREMENT
-        elif motion == key.LEFT:
-            self.y_rotation -= INCREMENT
-        elif motion == key.RIGHT:
-            self.y_rotation += INCREMENT
+    # def on_text_motion(self, motion):
+    #     if motion == key.UP:
+    #         self.x_rotation -= INCREMENT
+    #     elif motion == key.DOWN:
+    #         self.x_rotation += INCREMENT
+    #     elif motion == key.LEFT:
+    #         self.y_rotation -= INCREMENT
+    #     elif motion == key.RIGHT:
+    #         self.y_rotation += INCREMENT

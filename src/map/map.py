@@ -1,3 +1,6 @@
+import pyglet
+
+
 class Map:
     def __init__(self, name, width, height, cubes, cube_styles, floor_cubes, border):
         self.name = name
@@ -7,3 +10,16 @@ class Map:
         self.cube_styles = cube_styles
         self.floor_cubes = floor_cubes
         self.border = border
+
+        self.batch = pyglet.graphics.Batch()
+
+    @staticmethod
+    def cube_vertices(x, y, z, n):
+        return [
+            x - n, y - n, z - n,  x + n, y - n, z - n,  x + n, y - n, z + n,  x - n, y - n, z + n,  # bottom
+            x - n, y - n, z - n,  x - n, y - n, z + n,  x - n, y + n, z + n,  x - n, y + n, z - n,  # left
+            x - n, y + n, z - n,  x - n, y + n, z + n,  x + n, y + n, z + n,  x + n, y + n, z - n,  # top
+            x + n, y - n, z + n,  x + n, y - n, z - n,  x + n, y + n, z - n,  x + n, y + n, z + n,  # right
+            x - n, y - n, z + n,  x + n, y - n, z + n,  x + n, y + n, z + n,  x - n, y + n, z + n,  # front
+            x + n, y - n, z - n,  x - n, y - n, z - n,  x - n, y + n, z - n,  x + n, y + n, z - n,  # back
+        ]
