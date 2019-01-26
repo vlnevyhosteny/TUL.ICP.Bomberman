@@ -22,6 +22,7 @@ class GameWindow(pyglet.window.Window):
         # Clear the current GL Window
         self.clear()
 
+        self.selected_map.initialize()
         self.selected_map.draw()
 
         pass
