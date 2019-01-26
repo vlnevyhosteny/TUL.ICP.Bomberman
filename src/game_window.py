@@ -1,8 +1,6 @@
 from pyglet.gl import *
 
-from src.config.map_config import MapConfig
 from src.config.window_config import WindowConfig
-from src.map.map_drawer import draw_map
 from src.map.map_json_parser import parse_map_from_folder
 
 class GameWindow(pyglet.window.Window):
@@ -18,13 +16,13 @@ class GameWindow(pyglet.window.Window):
         glClearColor(0.2, 0.3, 0.2, 1.0)
         glEnable(GL_DEPTH_TEST)
 
-        pyglet.clock.schedule_interval(self.update, 1.0 / WindowConfig.TICKS_PER_SEC)
+        pyglet.clock.schedule_interval(self.update, 1.0 / WindowConfig.TICKS_PER_SECOND)
 
     def on_draw(self):
         # Clear the current GL Window
         self.clear()
 
-        # draw_map(self.selected_map, MapConfig)
+        self.selected_map.draw()
 
         pass
 
@@ -42,6 +40,9 @@ class GameWindow(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glTranslatef(0, 0, -400)
+
+    def update(self, dt):
+        pass
 
     # def on_show(self):
     #     pyglet.gl.glClear(pyglet.gl.GL_COLOR_BUFFER_BIT | pyglet.gl.GL_DEPTH_BUFFER_BIT)

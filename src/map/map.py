@@ -1,4 +1,15 @@
+from typing import List, Tuple
+
 import pyglet
+
+CUBE_FACES: List[Tuple[int, int, int]] = [
+    (0, 1, 0),
+    (0, -1, 0),
+    (-1, 0, 0),
+    (1, 0, 0),
+    (0, 0, 1),
+    (0, 0, -1),
+]
 
 
 class Map:
@@ -12,6 +23,9 @@ class Map:
         self.border = border
 
         self.batch = pyglet.graphics.Batch()
+
+    def draw(self):
+        pass
 
     @staticmethod
     def cube_vertices(x, y, z, n):
