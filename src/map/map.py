@@ -15,6 +15,9 @@ CUBE_FACES: List[Tuple[int, int, int]] = [
     (0, 0, -1),
 ]
 
+background = pyglet.graphics.OrderedGroup(0)
+foreground = pyglet.graphics.OrderedGroup(1)
+
 
 class Map:
     def __init__(self, name, width, height, cubes, cube_styles, floor_cubes, border):
@@ -31,30 +34,27 @@ class Map:
 
         self.batch = pyglet.graphics.Batch()
 
-    def draw(self):
-        pass
-
     def initialize(self):
         # floor
         for x in xrange(0, self.height, 1):
             for y in xrange(0, self.width, 1):
                 cube_config = self.floor_cubes[x][y]
-                cube_style = next(s for s in self.cube_styles if s.id == cube_config.style_id)
+                #cube_style = next(s for s in self.cube_styles if s.style_id == cube_config.style_id)
 
-                self.create_cube((x, y, 0), cube_config, cube_style)
+                self.create_cube(x, y, 0)
 
         # field
         for x in xrange(0, self.height, 1):
             for y in xrange(0, self.width, 1):
                 cube_config = self.cubes[x][y]
-                cube_style = next(s for s in self.cube_styles if s.id == cube_config.style_id)
+                cube_style = next(s for s in self.cube_styles if s.style_id == cube_config.style_id)
 
-                self.create_cube(x, y, 1, cube_config, cube_style)
+                self.create_cube(x, y, 1)
                 
-    def create_cube(self, x: int, y: int, z: int, cube_config: Cube, cube_style: CubeStyle) -> None:
+    def create_cube(self, x: int, y: int, z: int) -> None:
         vertex = Map.cube_vertices(x, y, z, 0.5)
 
-        self.batch.add(24, GL_QUADS, 1, ('v3f/static', vertex))
+        self.batch.add(24, GL_QUADS, foreground, ('v3f/static', vertex))
 
     @staticmethod
     def cube_vertices(x, y, z, n):

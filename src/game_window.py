@@ -1,3 +1,5 @@
+import math
+
 from pyglet.gl import *
 
 from src.config.window_config import WindowConfig
@@ -10,8 +12,12 @@ class GameWindow(pyglet.window.Window):
         self.window_config = window_config
         self.set_minimum_size(window_config.WIDTH, window_config.HEIGHT)
 
+        self.rotation = (0, 0)
+        self.position = (0, 0, 0)
+
         self.maps = parse_map_from_folder('maps')
         self.selected_map = self.maps[0]
+        self.selected_map.initialize()
 
         glClearColor(0.2, 0.3, 0.2, 1.0)
         glEnable(GL_DEPTH_TEST)
@@ -22,10 +28,10 @@ class GameWindow(pyglet.window.Window):
         # Clear the current GL Window
         self.clear()
 
-        self.selected_map.initialize()
-        self.selected_map.draw()
-
-        pass
+        self.set_3d()
+        glColor3d(1, 1, 1)
+        self.selected_map.batch.draw()
+        self.set_2d()
 
     def on_resize(self, width, height):
         # set the Viewport
@@ -60,3 +66,32 @@ class GameWindow(pyglet.window.Window):
     #         self.y_rotation -= INCREMENT
     #     elif motion == key.RIGHT:
     #         self.y_rotation += INCREMENT
+
+    def set_2d(self):
+        """ Configure OpenGL to draw in 2d.
+        """
+        width, height = self.get_size()
+        glDisable(GL_DEPTH_TEST)
+        glViewport(0, 0, width, height)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(0, width, 0, height, -1, 1)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+    def set_3d(self):
+        """ Configure OpenGL to draw in 3d.
+        """
+        width, height = self.get_size()
+        glEnable(GL_DEPTH_TEST)
+        glViewport(0, 0, width, height)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(65.0, width / float(height), 0.1, 60.0)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        x, y = self.rotation
+        glRotatef(x, 0, 1, 0)
+        glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
+        x, y, z = self.position
+        glTranslatef(-x, -y, -z)
