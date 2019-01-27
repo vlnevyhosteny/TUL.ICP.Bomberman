@@ -420,7 +420,7 @@ class Window(pyglet.window.Window):
         self.exclusive = False
 
         # When flying gravity has no effect and speed is increased.
-        self.flying = False
+        self.flying = True
 
         # Strafing is moving lateral to the direction you are facing,
         # e.g. moving to the left or right while continuing to face forward.
@@ -432,7 +432,7 @@ class Window(pyglet.window.Window):
 
         # Current (x, y, z) position in the world, specified with floats. Note
         # that, perhaps unlike in math class, the y-axis is the vertical axis.
-        self.position = (0, 0, 0)
+        self.position = (8, 8, 0)
 
         # First element is rotation of the player in the x-z plane (ground
         # plane) measured from the z-axis down. The second is the rotation
@@ -699,13 +699,13 @@ class Window(pyglet.window.Window):
 
         """
         if symbol == key.W:
-            self.strafe[0] -= 1
+            self.strafe[0] -= 0 #1
         elif symbol == key.S:
-            self.strafe[0] += 1
+            self.strafe[0] += 0 #1
         elif symbol == key.A:
-            self.strafe[1] -= 1
+            self.strafe[1] -= 0 #1
         elif symbol == key.D:
-            self.strafe[1] += 1
+            self.strafe[1] += 0 #1
         elif symbol == key.SPACE:
             if self.dy == 0:
                 self.dy = 0 #JUMP_SPEED
