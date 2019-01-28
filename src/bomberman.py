@@ -126,6 +126,23 @@ def sectorize(position):
     return (x, 0, z)
 
 
+def is_starting_position(x: int, z: int, field_size: int) -> bool:
+    field_size = field_size / 2
+
+    if x in (-field_size + 1, field_size - 1) and z in (-field_size + 1, field_size - 1):
+        return True
+    if x in (-field_size + 2, field_size - 1) and z in (-field_size + 1, field_size - 1):
+        return True
+    if x in (-field_size + 1, field_size - 2) and z in (-field_size + 1, field_size - 1):
+        return True
+    if x in (-field_size + 1, field_size - 1) and z in (-field_size + 2, field_size - 1):
+        return True
+    if x in (-field_size + 1, field_size - 1) and z in (-field_size + 1, field_size - 2):
+        return True
+
+    return False
+
+
 class Model(object):
 
     def __init__(self):
@@ -162,14 +179,23 @@ class Model(object):
         n = 5  # 1/2 width and height of world
         s = 1  # step size
         y = 0  # initial y height
+        player_count = 2
+
         for x in xrange(-n, n + 1, s):
             for z in xrange(-n, n + 1, s):
                 # create a layer stone an grass everywhere.
-                self.add_block((x, y - 2, z), GRASS, immediate=False)
-                self.add_block((x, y - 3, z), STONE, immediate=False)
+
+                if is_starting_position(x, z, n * 2, player_count) is False:
+                    if (x % 2) == 0 or (z % 2) == 0:
+                        self.add_block((x, y, z), GRASS, immediate=False)
+                    else:
+                        self.add_block((x, y, z), STONE, immediate=False)
+
+                self.add_block((x, y - 1, z), STONE, immediate=False)
+
                 if x in (-n, n) or z in (-n, n):
                     # create outer walls.
-                    for dy in xrange(-2, -1):
+                    for dy in xrange(0, 1):
                         self.add_block((x, y + dy, z), STONE, immediate=False)
 
     def hit_test(self, position, vector, max_distance=8):
@@ -730,13 +756,13 @@ class Window(pyglet.window.Window):
 
         """
         if symbol == key.W:
-            self.strafe[0] += 1
+            self.strafe[0] += 0 #1
         elif symbol == key.S:
-            self.strafe[0] -= 1
+            self.strafe[0] -= 0 #1
         elif symbol == key.A:
-            self.strafe[1] += 1
+            self.strafe[1] += 0 #1
         elif symbol == key.D:
-            self.strafe[1] -= 1
+            self.strafe[1] -= 0 #1
 
     def on_resize(self, width, height):
         """ Called when the window is resized to a new `width` and `height`.
