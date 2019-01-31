@@ -504,9 +504,6 @@ class Window(pyglet.window.Window):
         # Which sector the player is currently in.
         self.sector = None
 
-        # The crosshairs at the center of the screen.
-        self.reticle = None
-
         # Velocity in the y (upward) direction.
         self.dy = 0
 
@@ -639,7 +636,7 @@ class Window(pyglet.window.Window):
         """
         # walking
         speed = FLYING_SPEED if self.flying else WALKING_SPEED
-        d = dt * speed # distance covered this tick.
+        d = dt * speed  # distance covered this tick.
         dx, dy, dz = self.get_motion_vector()
         # New position in space, before accounting for gravity.
         dx, dy, dz = dx * d, dy * d, dz * d
@@ -835,13 +832,8 @@ class Window(pyglet.window.Window):
         # label
         self.label.y = height - 10
 
-        # reticle
-        if self.reticle:
-            self.reticle.delete()
-
         x, y = self.width // 2, self.height // 2
         n = 10
-        self.reticle = pyglet.graphics.vertex_list(4, ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n)))
 
     def set_2d(self):
         """ Configure OpenGL to draw in 2d.
@@ -888,27 +880,8 @@ class Window(pyglet.window.Window):
         self.set_3d()
         glColor3d(1, 1, 1)
         self.model.batch.draw()
-        self.draw_focused_block()
         self.set_2d()
         self.draw_label()
-        self.draw_reticle()
-
-    def draw_focused_block(self):
-        """ Draw black edges around the block that is currently under the
-        crosshairs.
-
-        """
-        vector = self.get_sight_vector()
-        block = self.model.hit_test(self.position, vector)[0]
-
-        if block:
-            x, y, z = block
-            vertex_data = cube_vertices(x, y, z, 0.51)
-
-            glColor3d(0, 0, 0)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-            pyglet.graphics.draw(24, GL_QUADS, ('v3f/static', vertex_data))
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
     def draw_label(self):
         """ Draw the label in the top left of the screen.
@@ -920,13 +893,6 @@ class Window(pyglet.window.Window):
             len(self.model._shown), len(self.model.world))
 
         self.label.draw()
-
-    def draw_reticle(self):
-        """ Draw the crosshairs in the center of the screen.
-
-        """
-        glColor3d(0, 0, 0)
-        self.reticle.draw(GL_LINES)
 
 
 def setup_fog():
