@@ -31,10 +31,20 @@ MAX_JUMP_HEIGHT = 1.0 # About the height of a block.
 JUMP_SPEED = math.sqrt(2 * GRAVITY * MAX_JUMP_HEIGHT)
 TERMINAL_VELOCITY = 50
 
-PLAYER_HEIGHT = 2
+PLAYER_HEIGHT = 1
+
+FIELD_SIZE = 10
+
+STARTING_POSITION_X = 0
+STARTING_POSITION_Y = 8
+STARTING_POSITION_Z = -8
+
+STARTING_ROTATION_X = -180
+STARTING_ROTATION_Y = -45
 
 if sys.version_info[0] >= 3:
     xrange = range
+
 
 def cube_vertices(x, y, z, n):
     """ Return the vertices of the cube at position x, y, z with size 2*n.
@@ -185,7 +195,7 @@ class Model(object):
             for z in xrange(-n, n + 1, s):
                 # create a layer stone an grass everywhere.
 
-                if is_starting_position(x, z, n * 2, player_count) is False:
+                if is_starting_position(x, z, n * 2) is False:
                     if (x % 2) == 0 or (z % 2) == 0:
                         self.add_block((x, y, z), GRASS, immediate=False)
                     else:
@@ -458,7 +468,7 @@ class Window(pyglet.window.Window):
 
         # Current (x, y, z) position in the world, specified with floats. Note
         # that, perhaps unlike in math class, the y-axis is the vertical axis.
-        self.position = (8, 8, 0)
+        self.position = (STARTING_POSITION_X, STARTING_POSITION_Y, STARTING_POSITION_Z)
 
         # First element is rotation of the player in the x-z plane (ground
         # plane) measured from the z-axis down. The second is the rotation
@@ -466,7 +476,7 @@ class Window(pyglet.window.Window):
         #
         # The vertical plane rotation ranges from -90 (looking straight down) to
         # 90 (looking straight up). The horizontal rotation range is unbounded.
-        self.rotation = (0, 0)
+        self.rotation = (STARTING_ROTATION_X, STARTING_ROTATION_Y)
 
         # Which sector the player is currently in.
         self.sector = None
