@@ -2,7 +2,6 @@ from __future__ import division
 
 import sys
 import math
-import random
 import time
 
 from collections import deque
@@ -33,7 +32,7 @@ TERMINAL_VELOCITY = 50
 
 PLAYER_HEIGHT = 1
 
-FIELD_SIZE = 10
+HALF_OF_FIELD_SIZE = 5
 
 STARTING_POSITION_X = 0
 STARTING_POSITION_Y = 8
@@ -92,12 +91,12 @@ BRICK = tex_coords((2, 0), (2, 0), (2, 0))
 STONE = tex_coords((2, 1), (2, 1), (2, 1))
 
 FACES = [
-    ( 0, 1, 0),
-    ( 0,-1, 0),
+    (0, 1, 0),
+    (0, -1, 0),
     (-1, 0, 0),
-    ( 1, 0, 0),
-    ( 0, 0, 1),
-    ( 0, 0,-1),
+    (1, 0, 0),
+    (0, 0, 1),
+    (0, 0, -1),
 ]
 
 
@@ -116,7 +115,7 @@ def normalize(position):
     """
     x, y, z = position
     x, y, z = (int(round(x)), int(round(y)), int(round(z)))
-    return (x, y, z)
+    return x, y, z
 
 
 def sectorize(position):
@@ -133,7 +132,7 @@ def sectorize(position):
     """
     x, y, z = normalize(position)
     x, y, z = x // SECTOR_SIZE, y // SECTOR_SIZE, z // SECTOR_SIZE
-    return (x, 0, z)
+    return x, 0, z
 
 
 def is_starting_position(x: int, z: int, field_size: int) -> bool:
@@ -186,14 +185,12 @@ class Model(object):
         """ Initialize the world by placing all the blocks.
 
         """
-        n = 5  # 1/2 width and height of world
+        n = HALF_OF_FIELD_SIZE
         s = 1  # step size
         y = 0  # initial y height
-        player_count = 2
 
         for x in xrange(-n, n + 1, s):
             for z in xrange(-n, n + 1, s):
-                # create a layer stone an grass everywhere.
 
                 if is_starting_position(x, z, n * 2) is False:
                     if (x % 2) == 0 or (z % 2) == 0:
@@ -227,12 +224,17 @@ class Model(object):
         x, y, z = position
         dx, dy, dz = vector
         previous = None
+
         for _ in xrange(max_distance * m):
+
             key = normalize((x, y, z))
+
             if key != previous and key in self.world:
                 return key, previous
+
             previous = key
             x, y, z = x + dx / m, y + dy / m, z + dz / m
+
         return None, None
 
     def exposed(self, position):
@@ -241,9 +243,12 @@ class Model(object):
 
         """
         x, y, z = position
+
         for dx, dy, dz in FACES:
+
             if (x + dx, y + dy, z + dz) not in self.world:
                 return True
+
         return False
 
     def add_block(self, position, texture, immediate=True):
@@ -262,11 +267,14 @@ class Model(object):
         """
         if position in self.world:
             self.remove_block(position, immediate)
+
         self.world[position] = texture
         self.sectors.setdefault(sectorize(position), []).append(position)
+
         if immediate:
             if self.exposed(position):
                 self.show_block(position)
+
             self.check_neighbors(position)
 
     def remove_block(self, position, immediate=True):
@@ -282,9 +290,11 @@ class Model(object):
         """
         del self.world[position]
         self.sectors[sectorize(position)].remove(position)
+
         if immediate:
             if position in self.shown:
                 self.hide_block(position)
+
             self.check_neighbors(position)
 
     def check_neighbors(self, position):
@@ -295,8 +305,11 @@ class Model(object):
 
         """
         x, y, z = position
+
         for dx, dy, dz in FACES:
+
             key = (x + dx, y + dy, z + dz)
+
             if key not in self.world:
                 continue
             if self.exposed(key):
@@ -320,6 +333,7 @@ class Model(object):
         """
         texture = self.world[position]
         self.shown[position] = texture
+
         if immediate:
             self._show_block(position, texture)
         else:
@@ -340,11 +354,10 @@ class Model(object):
         x, y, z = position
         vertex_data = cube_vertices(x, y, z, 0.5)
         texture_data = list(texture)
+
         # create vertex list
-        # FIXME Maybe `add_indexed()` should be used instead
-        self._shown[position] = self.batch.add(24, GL_QUADS, self.group,
-            ('v3f/static', vertex_data),
-            ('t2f/static', texture_data))
+        self._shown[position] = self.batch.add(24, GL_QUADS, self.group, ('v3f/static', vertex_data),
+                                               ('t2f/static', texture_data))
 
     def hide_block(self, position, immediate=True):
         """ Hide the block at the given `position`. Hiding does not remove the
@@ -359,6 +372,7 @@ class Model(object):
 
         """
         self.shown.pop(position)
+
         if immediate:
             self._hide_block(position)
         else:
@@ -376,6 +390,7 @@ class Model(object):
 
         """
         for position in self.sectors.get(sector, []):
+
             if position not in self.shown and self.exposed(position):
                 self.show_block(position, False)
 
@@ -385,6 +400,7 @@ class Model(object):
 
         """
         for position in self.sectors.get(sector, []):
+
             if position in self.shown:
                 self.hide_block(position, False)
 
@@ -397,9 +413,13 @@ class Model(object):
         before_set = set()
         after_set = set()
         pad = 4
+
         for dx in xrange(-pad, pad + 1):
-            for dy in [0]:  # xrange(-pad, pad + 1):
+
+            for dy in [0]:
+
                 for dz in xrange(-pad, pad + 1):
+
                     if dx ** 2 + dy ** 2 + dz ** 2 > (pad + 1) ** 2:
                         continue
                     if before:
@@ -408,8 +428,10 @@ class Model(object):
                     if after:
                         x, y, z = after
                         after_set.add((x + dx, y + dy, z + dz))
+
         show = after_set - before_set
         hide = before_set - after_set
+
         for sector in show:
             self.show_sector(sector)
         for sector in hide:
@@ -436,6 +458,7 @@ class Model(object):
 
         """
         start = time.clock()
+
         while self.queue and time.clock() - start < 1.0 / TICKS_PER_SEC:
             self._dequeue()
 
@@ -503,8 +526,7 @@ class Window(pyglet.window.Window):
 
         # The label that is displayed in the top left of the canvas.
         self.label = pyglet.text.Label('', font_name='Arial', font_size=18,
-            x=10, y=self.height - 10, anchor_x='left', anchor_y='top',
-            color=(0, 0, 0, 255))
+                                       x=10, y=self.height - 10, anchor_x='left', anchor_y='top', color=(0, 0, 0, 255))
 
         # This call schedules the `update()` method to be called
         # TICKS_PER_SEC. This is the main game event loop.
@@ -533,7 +555,7 @@ class Window(pyglet.window.Window):
         dy = math.sin(math.radians(y))
         dx = math.cos(math.radians(x - 90)) * m
         dz = math.sin(math.radians(x - 90)) * m
-        return (dx, dy, dz)
+        return dx, dy, dz
 
     def get_motion_vector(self):
         """ Returns the current motion vector indicating the velocity of the
@@ -550,9 +572,11 @@ class Window(pyglet.window.Window):
             strafe = math.degrees(math.atan2(*self.strafe))
             y_angle = math.radians(y)
             x_angle = math.radians(x + strafe)
+
             if self.flying:
                 m = math.cos(y_angle)
                 dy = math.sin(y_angle)
+
                 if self.strafe[1]:
                     # Moving left or right.
                     dy = 0.0
@@ -568,11 +592,13 @@ class Window(pyglet.window.Window):
                 dy = 0.0
                 dx = math.cos(x_angle)
                 dz = math.sin(x_angle)
+
         else:
             dy = 0.0
             dx = 0.0
             dz = 0.0
-        return (dx, dy, dz)
+
+        return dx, dy, dz
 
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
@@ -586,13 +612,18 @@ class Window(pyglet.window.Window):
         """
         self.model.process_queue()
         sector = sectorize(self.position)
+
         if sector != self.sector:
             self.model.change_sectors(self.sector, sector)
+
             if self.sector is None:
                 self.model.process_entire_queue()
+
             self.sector = sector
+
         m = 8
         dt = min(dt, 0.2)
+
         for _ in xrange(m):
             self._update(dt / m)
 
@@ -613,6 +644,7 @@ class Window(pyglet.window.Window):
         # New position in space, before accounting for gravity.
         dx, dy, dz = dx * d, dy * d, dz * d
         # gravity
+
         if not self.flying:
             # Update your vertical speed: if you are falling, speed up until you
             # hit terminal velocity; if you are jumping, slow down until you
@@ -620,6 +652,7 @@ class Window(pyglet.window.Window):
             self.dy -= dt * GRAVITY
             self.dy = max(self.dy, -TERMINAL_VELOCITY)
             dy += self.dy * dt
+
         # collisions
         x, y, z = self.position
         x, y, z = self.collide((x + dx, y + dy, z + dz), PLAYER_HEIGHT)
@@ -649,26 +682,34 @@ class Window(pyglet.window.Window):
         pad = 0.25
         p = list(position)
         np = normalize(position)
+
         for face in FACES:  # check all surrounding blocks
             for i in xrange(3):  # check each dimension independently
+
                 if not face[i]:
                     continue
+
                 # How much overlap you have with this dimension.
                 d = (p[i] - np[i]) * face[i]
                 if d < pad:
                     continue
+
                 for dy in xrange(height):  # check each height
+
                     op = list(np)
                     op[1] -= dy
                     op[i] += face[i]
                     if tuple(op) not in self.model.world:
                         continue
+
                     p[i] -= (d - pad) * face[i]
+
                     if face == (0, -1, 0) or face == (0, 1, 0):
                         # You are colliding with the ground or ceiling, so stop
                         # falling / rising.
                         self.dy = 0
                     break
+
         return tuple(p)
 
     def on_mouse_press(self, x, y, button, modifiers):
@@ -691,15 +732,18 @@ class Window(pyglet.window.Window):
         if self.exclusive:
             vector = self.get_sight_vector()
             block, previous = self.model.hit_test(self.position, vector)
-            if (button == mouse.RIGHT) or \
-                    ((button == mouse.LEFT) and (modifiers & key.MOD_CTRL)):
+
+            if (button == mouse.RIGHT) or ((button == mouse.LEFT) and (modifiers & key.MOD_CTRL)):
                 # ON OSX, control + left click = right click.
                 if previous:
                     self.model.add_block(previous, self.block)
+
             elif button == pyglet.window.mouse.LEFT and block:
                 texture = self.model.world[block]
+
                 if texture != STONE:
                     self.model.remove_block(block)
+
         else:
             self.set_exclusive_mouse(True)
 
@@ -736,19 +780,26 @@ class Window(pyglet.window.Window):
         """
         if symbol == key.W:
             self.strafe[0] -= 0 #1
+
         elif symbol == key.S:
             self.strafe[0] += 0 #1
+
         elif symbol == key.A:
             self.strafe[1] -= 0 #1
+
         elif symbol == key.D:
             self.strafe[1] += 0 #1
+
         elif symbol == key.SPACE:
             if self.dy == 0:
                 self.dy = 0 #JUMP_SPEED
+
         elif symbol == key.ESCAPE:
             self.set_exclusive_mouse(False)
+
         elif symbol == key.TAB:
             self.flying = not self.flying
+
         elif symbol in self.num_keys:
             index = (symbol - self.num_keys[0]) % len(self.inventory)
             self.block = self.inventory[index]
@@ -767,10 +818,13 @@ class Window(pyglet.window.Window):
         """
         if symbol == key.W:
             self.strafe[0] += 0 #1
+
         elif symbol == key.S:
             self.strafe[0] -= 0 #1
+
         elif symbol == key.A:
             self.strafe[1] += 0 #1
+
         elif symbol == key.D:
             self.strafe[1] -= 0 #1
 
@@ -780,20 +834,21 @@ class Window(pyglet.window.Window):
         """
         # label
         self.label.y = height - 10
+
         # reticle
         if self.reticle:
             self.reticle.delete()
+
         x, y = self.width // 2, self.height // 2
         n = 10
-        self.reticle = pyglet.graphics.vertex_list(4,
-            ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
-        )
+        self.reticle = pyglet.graphics.vertex_list(4, ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n)))
 
     def set_2d(self):
         """ Configure OpenGL to draw in 2d.
 
         """
         width, height = self.get_size()
+
         glDisable(GL_DEPTH_TEST)
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
@@ -807,6 +862,7 @@ class Window(pyglet.window.Window):
 
         """
         width, height = self.get_size()
+
         glEnable(GL_DEPTH_TEST)
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
@@ -814,10 +870,14 @@ class Window(pyglet.window.Window):
         gluPerspective(65.0, width / float(height), 0.1, 60.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
+
         x, y = self.rotation
+
         glRotatef(x, 0, 1, 0)
         glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
+
         x, y, z = self.position
+
         glTranslatef(-x, -y, -z)
 
     def on_draw(self):
@@ -840,9 +900,11 @@ class Window(pyglet.window.Window):
         """
         vector = self.get_sight_vector()
         block = self.model.hit_test(self.position, vector)[0]
+
         if block:
             x, y, z = block
             vertex_data = cube_vertices(x, y, z, 0.51)
+
             glColor3d(0, 0, 0)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
             pyglet.graphics.draw(24, GL_QUADS, ('v3f/static', vertex_data))
@@ -856,6 +918,7 @@ class Window(pyglet.window.Window):
         self.label.text = '%02d (%.2f, %.2f, %.2f) %d / %d' % (
             pyglet.clock.get_fps(), x, y, z,
             len(self.model._shown), len(self.model.world))
+
         self.label.draw()
 
     def draw_reticle(self):
