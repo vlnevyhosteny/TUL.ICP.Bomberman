@@ -142,6 +142,25 @@ def is_starting_position(x, z, field_size):
     return False
 
 
+def pythagoras_get_c(a, b):
+    return math.sqrt(a ^ 2 + b ^ 2)
+
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+
+    return qx, qy
+
+
 class Model(object):
 
     def __init__(self):
@@ -483,6 +502,8 @@ class Window(pyglet.window.Window):
         # that, perhaps unlike in math class, the y-axis is the vertical axis.
         self.position = (STARTING_POSITION_X, STARTING_POSITION_Y, STARTING_POSITION_Z)
 
+        self.spectator_distance_to_center = pythagoras_get_c(HALF_OF_FIELD_SIZE, HALF_OF_FIELD_SIZE)
+
         # First element is rotation of the player in the x-z plane (ground
         # plane) measured from the z-axis down. The second is the rotation
         # angle from the ground plane up. Rotation is in degrees.
@@ -490,6 +511,7 @@ class Window(pyglet.window.Window):
         # The vertical plane rotation ranges from -90 (looking straight down) to
         # 90 (looking straight up). The horizontal rotation range is unbounded.
         self.rotation = (STARTING_ROTATION_X, STARTING_ROTATION_Y)
+        self.rotate_horizontally = 0  # if -1 then rotate one step to left, if 1 to right
 
         # Which sector the player is currently in.
         self.sector = None
@@ -587,6 +609,19 @@ class Window(pyglet.window.Window):
 
         return dx, dy, dz
 
+    def if_needed_rotate_horizontally(self):
+        if self.rotate_horizontally != 0:
+            if self.rotate_horizontally == 1: #right
+                x, z = rotate((0, 0), (self.position[0], self.position[2]), math.radians(-1))
+
+                self.position = (x, self.position[1], z)
+                self.rotation = (self.rotation[0] - 1, self.rotation[1])
+            elif self.rotate_horizontally == -1: #left
+                x, z = rotate((0, 0), (self.position[0], self.position[2]), math.radians(1))
+
+                self.position = (x, self.position[1], z)
+                self.rotation = (self.rotation[0] + 1, self.rotation[1])
+
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
         clock.
@@ -632,13 +667,7 @@ class Window(pyglet.window.Window):
         dx, dy, dz = dx * d, dy * d, dz * d
         # gravity
 
-        if not self.flying:
-            # Update your vertical speed: if you are falling, speed up until you
-            # hit terminal velocity; if you are jumping, slow down until you
-            # start falling.
-            self.dy -= dt * GRAVITY
-            self.dy = max(self.dy, -TERMINAL_VELOCITY)
-            dy += self.dy * dt
+        self.if_needed_rotate_horizontally()
 
         # collisions
         x, y, z = self.position
@@ -791,6 +820,12 @@ class Window(pyglet.window.Window):
             index = (symbol - self.num_keys[0]) % len(self.inventory)
             self.block = self.inventory[index]
 
+        elif symbol == key.RIGHT:
+            self.rotate_horizontally = 1
+
+        elif symbol == key.LEFT:
+            self.rotate_horizontally = -1
+
     def on_key_release(self, symbol, modifiers):
         """ Called when the player releases a key. See pyglet docs for key
         mappings.
@@ -814,6 +849,12 @@ class Window(pyglet.window.Window):
 
         elif symbol == key.D:
             self.strafe[1] -= 0 #1
+
+        elif symbol == key.RIGHT:
+            self.rotate_horizontally = 0
+
+        elif symbol == key.LEFT:
+            self.rotate_horizontally = 0
 
     def on_resize(self, width, height):
         """ Called when the window is resized to a new `width` and `height`.
