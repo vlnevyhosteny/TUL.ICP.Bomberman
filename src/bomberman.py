@@ -512,6 +512,7 @@ class Window(pyglet.window.Window):
         # 90 (looking straight up). The horizontal rotation range is unbounded.
         self.rotation = (STARTING_ROTATION_X, STARTING_ROTATION_Y)
         self.rotate_horizontally = 0  # if -1 then rotate one step to left, if 1 to right
+        self.rotate_vertically = 0  # if -1 then rotate one step to bottom, if 1 to top
 
         # Which sector the player is currently in.
         self.sector = None
@@ -611,16 +612,29 @@ class Window(pyglet.window.Window):
 
     def if_needed_rotate_horizontally(self):
         if self.rotate_horizontally != 0:
-            if self.rotate_horizontally == 1: #right
+            if self.rotate_horizontally == 1:  # right
                 x, z = rotate((0, 0), (self.position[0], self.position[2]), math.radians(-1))
 
                 self.position = (x, self.position[1], z)
                 self.rotation = (self.rotation[0] - 1, self.rotation[1])
-            elif self.rotate_horizontally == -1: #left
+            elif self.rotate_horizontally == -1:  # left
                 x, z = rotate((0, 0), (self.position[0], self.position[2]), math.radians(1))
 
                 self.position = (x, self.position[1], z)
                 self.rotation = (self.rotation[0] + 1, self.rotation[1])
+
+    def if_needed_rotate_vertically(self):
+        if self.rotate_vertically != 0:
+            if self.rotate_vertically == 1 and self.rotation[1] > -90:
+                z, y = rotate((0, 0), (self.position[2], self.position[1]), math.radians(-1))
+
+                self.position = (self.position[0], y, z)
+                self.rotation = (self.rotation[0], self.rotation[1] - 1)
+            elif self.rotate_vertically == -1 and self.rotation[1] <= 90:
+                z, y = rotate((0, 0), (self.position[2], self.position[1]), math.radians(1))
+
+                self.position = (self.position[0], y, z)
+                self.rotation = (self.rotation[0], self.rotation[1] + 1)
 
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
@@ -668,6 +682,7 @@ class Window(pyglet.window.Window):
         # gravity
 
         self.if_needed_rotate_horizontally()
+        self.if_needed_rotate_vertically()
 
         # collisions
         x, y, z = self.position
@@ -826,6 +841,12 @@ class Window(pyglet.window.Window):
         elif symbol == key.LEFT:
             self.rotate_horizontally = -1
 
+        elif symbol == key.UP:
+            self.rotate_vertically = 1
+
+        elif symbol == key.DOWN:
+            self.rotate_vertically = -1
+
     def on_key_release(self, symbol, modifiers):
         """ Called when the player releases a key. See pyglet docs for key
         mappings.
@@ -855,6 +876,12 @@ class Window(pyglet.window.Window):
 
         elif symbol == key.LEFT:
             self.rotate_horizontally = 0
+
+        elif symbol == key.UP:
+            self.rotate_vertically = 0
+
+        elif symbol == key.DOWN:
+            self.rotate_vertically = 0
 
     def on_resize(self, width, height):
         """ Called when the window is resized to a new `width` and `height`.
@@ -919,8 +946,8 @@ class Window(pyglet.window.Window):
 
         """
         x, y, z = self.position
-        self.label.text = '%02d (%.2f, %.2f, %.2f) %d / %d' % (
-            pyglet.clock.get_fps(), x, y, z,
+        self.label.text = '%02d (%.2f, %.2f, %.2f) (%.2f, %.2f) %d / %d' % (
+            pyglet.clock.get_fps(), x, y, z, self.rotation[0], self.rotation[1],
             len(self.model._shown), len(self.model.world))
 
         self.label.draw()
