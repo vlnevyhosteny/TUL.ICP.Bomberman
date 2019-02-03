@@ -26,10 +26,10 @@ HALF_OF_FIELD_SIZE = 5
 
 STARTING_POSITION_X = 0
 STARTING_POSITION_Y = 8
-STARTING_POSITION_Z = -8
+STARTING_POSITION_Z = -5
 
 STARTING_ROTATION_X = -180
-STARTING_ROTATION_Y = -45
+STARTING_ROTATION_Y = -65
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -514,6 +514,10 @@ class Window(pyglet.window.Window):
         self.rotate_horizontally = 0  # if -1 then rotate one step to left, if 1 to right
         self.rotate_vertically = 0  # if -1 then rotate one step to bottom, if 1 to top
 
+        self.zoom = 0 # 1 zoom in, -1 zoom out
+
+        self.reset_spectator = False # if True then return to starting position
+
         # Which sector the player is currently in.
         self.sector = None
 
@@ -636,6 +640,25 @@ class Window(pyglet.window.Window):
                 self.position = (self.position[0], y, z)
                 self.rotation = (self.rotation[0], self.rotation[1] + 1)
 
+    def if_needed_zoom(self):
+        if self.zoom != 0:
+            x, y, z = self.position
+
+            if self.zoom > 0:
+                x, y, z = x - 0.1, y - 0.1, z - 0.1
+
+                if x < 0:
+                    x = 0
+                if y < 0:
+                    y = 0
+                if z < 0:
+                    z = 0
+
+            elif self.zoom < 0:
+                x, y, z = x + 0.1, y + 0.1, z + 0.1
+
+            self.position = x, y, z
+
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
         clock.
@@ -683,11 +706,12 @@ class Window(pyglet.window.Window):
 
         self.if_needed_rotate_horizontally()
         self.if_needed_rotate_vertically()
+        self.if_needed_zoom()
 
-        # collisions
-        x, y, z = self.position
-        x, y, z = self.collide((x + dx, y + dy, z + dz), PLAYER_HEIGHT)
-        self.position = (x, y, z)
+        if self.reset_spectator:
+            self.position = (STARTING_POSITION_X, STARTING_POSITION_Y, STARTING_POSITION_Z)
+            self.rotation = (STARTING_ROTATION_X, STARTING_ROTATION_Y)
+            self.reset_spectator = False
 
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`
@@ -797,6 +821,9 @@ class Window(pyglet.window.Window):
             y = max(-90, min(90, y))
             self.rotation = (x, y)
 
+    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        self.zoom = scroll_y
+
     def on_key_press(self, symbol, modifiers):
         """ Called when the player presses a key. See pyglet docs for key
         mappings.
@@ -846,6 +873,9 @@ class Window(pyglet.window.Window):
 
         elif symbol == key.DOWN:
             self.rotate_vertically = -1
+
+        elif symbol == key.R:
+            self.reset_spectator = True
 
     def on_key_release(self, symbol, modifiers):
         """ Called when the player releases a key. See pyglet docs for key
