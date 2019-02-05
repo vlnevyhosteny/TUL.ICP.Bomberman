@@ -8,6 +8,8 @@ from pyglet.graphics import TextureGroup
 
 from src.basic_helpers import *
 from src.game_config import *
+from src.npc_figure import NPCFigure
+from src.player_figure import PlayerFigure
 from src.textures import *
 
 
@@ -38,7 +40,17 @@ class GameField(object):
         # _show_block() and _hide_block() calls
         self.queue = deque()
 
+        self.player_figure, self.npc_figures = self._initialize_figures()
+
         self._initialize()
+
+    def _initialize_figures(self):
+        starting_positions = get_starting_positions(HALF_OF_FIELD_SIZE * 2)
+
+        player_figure = PlayerFigure(starting_positions[0][0], starting_positions[0][1])
+        npc_figure_one = NPCFigure(starting_positions[1][0], starting_positions[1][1])
+
+        return player_figure, [npc_figure_one]
 
     def _initialize(self):
         """ Initialize the world by placing all the blocks.

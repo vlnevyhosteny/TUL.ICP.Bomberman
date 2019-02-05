@@ -91,6 +91,12 @@ def is_starting_position(x, z, field_size):
     return False
 
 
+def get_starting_positions(field_size):
+    field_size /= 2
+
+    return [(field_size, -field_size), (-field_size, field_size), (-field_size, -field_size), (field_size, field_size)]
+
+
 def pythagoras_get_c(a, b):
     return math.sqrt(a ^ 2 + b ^ 2)
 

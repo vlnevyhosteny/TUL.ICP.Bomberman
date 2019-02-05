@@ -1,14 +1,11 @@
 from __future__ import division
 
-import math
-
 from past.builtins import xrange
 from pyglet.gl import *
 from pyglet.window import key
 
 from src.basic_helpers import *
 from src.game_field import GameField
-
 from src.game_config import *
 
 
@@ -44,9 +41,9 @@ class Window(pyglet.window.Window):
         self.rotate_horizontally = 0  # if -1 then rotate one step to left, if 1 to right
         self.rotate_vertically = 0  # if -1 then rotate one step to bottom, if 1 to top
 
-        self.zoom = 0 # 1 zoom in, -1 zoom out
+        self.zoom = 0  # 1 zoom in, -1 zoom out
 
-        self.reset_spectator = False # if True then return to starting position
+        self.reset_spectator = False  # if True then return to starting position
 
         # Which sector the player is currently in.
         self.sector = None
@@ -321,20 +318,19 @@ class Window(pyglet.window.Window):
 
         """
         if symbol == key.W:
-            self.strafe[0] -= 0 #1
+            self.strafe[0] -= 0  # 1
 
         elif symbol == key.S:
-            self.strafe[0] += 0 #1
+            self.strafe[0] += 0  # 1
 
         elif symbol == key.A:
-            self.strafe[1] -= 0 #1
+            self.strafe[1] -= 0  # 1
 
         elif symbol == key.D:
-            self.strafe[1] += 0 #1
+            self.strafe[1] += 0  # 1
 
         elif symbol == key.SPACE:
-            if self.dy == 0:
-                self.dy = 0 #JUMP_SPEED
+            pass
 
         elif symbol == key.ESCAPE:
             self.set_exclusive_mouse(False)
@@ -367,16 +363,16 @@ class Window(pyglet.window.Window):
 
         """
         if symbol == key.W:
-            self.strafe[0] += 0 #1
+            self.strafe[0] += 0  # 1
 
         elif symbol == key.S:
-            self.strafe[0] -= 0 #1
+            self.strafe[0] -= 0  # 1
 
         elif symbol == key.A:
-            self.strafe[1] += 0 #1
+            self.strafe[1] += 0  # 1
 
         elif symbol == key.D:
-            self.strafe[1] -= 0 #1
+            self.strafe[1] -= 0  # 1
 
         elif symbol == key.RIGHT:
             self.rotate_horizontally = 0
