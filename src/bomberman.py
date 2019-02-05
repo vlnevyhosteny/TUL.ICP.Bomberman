@@ -161,7 +161,7 @@ def rotate(origin, point, angle):
     return qx, qy
 
 
-class Model(object):
+class GameField(object):
 
     def __init__(self):
 
@@ -213,38 +213,6 @@ class Model(object):
                     # create outer walls.
                     for dy in xrange(0, 1):
                         self.add_block((x, y + dy, z), STONE, immediate=False)
-
-    def hit_test(self, position, vector, max_distance=8):
-        """ Line of sight search from current position. If a block is
-        intersected it is returned, along with the block previously in the line
-        of sight. If no block is found, return None, None.
-
-        Parameters
-        ----------
-        position : tuple of len 3
-            The (x, y, z) position to check visibility from.
-        vector : tuple of len 3
-            The line of sight vector.
-        max_distance : int
-            How many blocks away to search for a hit.
-
-        """
-        m = 8
-        x, y, z = position
-        dx, dy, dz = vector
-        previous = None
-
-        for _ in xrange(max_distance * m):
-
-            key = normalize((x, y, z))
-
-            if key != previous and key in self.world:
-                return key, previous
-
-            previous = key
-            x, y, z = x + dx / m, y + dy / m, z + dz / m
-
-        return None, None
 
     def exposed(self, position):
         """ Returns False is given `position` is surrounded on all 6 sides by
@@ -487,9 +455,6 @@ class Window(pyglet.window.Window):
         # Whether or not the window exclusively captures the mouse.
         self.exclusive = False
 
-        # When flying gravity has no effect and speed is increased.
-        self.flying = True
-
         # Strafing is moving lateral to the direction you are facing,
         # e.g. moving to the left or right while continuing to face forward.
         #
@@ -524,19 +489,8 @@ class Window(pyglet.window.Window):
         # Velocity in the y (upward) direction.
         self.dy = 0
 
-        # A list of blocks the player can place. Hit num keys to cycle.
-        self.inventory = [BRICK, GRASS, SAND]
-
-        # The current block the user can place. Hit num keys to cycle.
-        self.block = self.inventory[0]
-
-        # Convenience list of num keys.
-        self.num_keys = [
-            key._1, key._2, key._3, key._4, key._5,
-            key._6, key._7, key._8, key._9, key._0]
-
         # Instance of the model that handles the world.
-        self.model = Model()
+        self.model = GameField()
 
         # The label that is displayed in the top left of the canvas.
         self.label = pyglet.text.Label('', font_name='Arial', font_size=18,
@@ -697,11 +651,11 @@ class Window(pyglet.window.Window):
 
         """
         # walking
-        speed = FLYING_SPEED if self.flying else WALKING_SPEED
-        d = dt * speed  # distance covered this tick.
-        dx, dy, dz = self.get_motion_vector()
+        #speed = FLYING_SPEED if self.flying else WALKING_SPEED
+        #d = dt * speed  # distance covered this tick.
+        #dx, dy, dz = self.get_motion_vector()
         # New position in space, before accounting for gravity.
-        dx, dy, dz = dx * d, dy * d, dz * d
+        #dx, dy, dz = dx * d, dy * d, dz * d
         # gravity
 
         self.if_needed_rotate_horizontally()
@@ -767,41 +721,6 @@ class Window(pyglet.window.Window):
 
         return tuple(p)
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        """ Called when a mouse button is pressed. See pyglet docs for button
-        amd modifier mappings.
-
-        Parameters
-        ----------
-        x, y : int
-            The coordinates of the mouse click. Always center of the screen if
-            the mouse is captured.
-        button : int
-            Number representing mouse button that was clicked. 1 = left button,
-            4 = right button.
-        modifiers : int
-            Number representing any modifying keys that were pressed when the
-            mouse button was clicked.
-
-        """
-        if self.exclusive:
-            vector = self.get_sight_vector()
-            block, previous = self.model.hit_test(self.position, vector)
-
-            if (button == mouse.RIGHT) or ((button == mouse.LEFT) and (modifiers & key.MOD_CTRL)):
-                # ON OSX, control + left click = right click.
-                if previous:
-                    self.model.add_block(previous, self.block)
-
-            elif button == pyglet.window.mouse.LEFT and block:
-                texture = self.model.world[block]
-
-                if texture != STONE:
-                    self.model.remove_block(block)
-
-        else:
-            self.set_exclusive_mouse(True)
-
     def on_mouse_motion(self, x, y, dx, dy):
         """ Called when the player moves the mouse.
 
@@ -854,13 +773,6 @@ class Window(pyglet.window.Window):
 
         elif symbol == key.ESCAPE:
             self.set_exclusive_mouse(False)
-
-        elif symbol == key.TAB:
-            self.flying = not self.flying
-
-        elif symbol in self.num_keys:
-            index = (symbol - self.num_keys[0]) % len(self.inventory)
-            self.block = self.inventory[index]
 
         elif symbol == key.RIGHT:
             self.rotate_horizontally = 1
@@ -983,26 +895,7 @@ class Window(pyglet.window.Window):
         self.label.draw()
 
 
-def setup_fog():
-    """ Configure the OpenGL fog properties.
-
-    """
-    # Enable fog. Fog "blends a fog color with each rasterized pixel fragment's
-    # post-texturing color."
-    glEnable(GL_FOG)
-    # Set the fog color.
-    glFogfv(GL_FOG_COLOR, (GLfloat * 4)(0.5, 0.69, 1.0, 1))
-    # Say we have no preference between rendering speed and quality.
-    glHint(GL_FOG_HINT, GL_DONT_CARE)
-    # Specify the equation used to compute the blending factor.
-    glFogi(GL_FOG_MODE, GL_LINEAR)
-    # How close and far away fog starts and ends. The closer the start and end,
-    # the denser the fog in the fog range.
-    glFogf(GL_FOG_START, 20.0)
-    glFogf(GL_FOG_END, 60.0)
-
-
-def setup():
+def opengl_setup():
     """ Basic OpenGL configuration.
 
     """
@@ -1018,14 +911,13 @@ def setup():
     # as smooth."
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-    setup_fog()
 
 
 def main():
-    window = Window(width=800, height=600, caption='Pyglet', resizable=True)
+    window = Window(width=800, height=600, caption='Bomberman', resizable=True)
     # Hide the mouse cursor and prevent the mouse from leaving the window.
     window.set_exclusive_mouse(True)
-    setup()
+    opengl_setup()
     pyglet.app.run()
 
 
