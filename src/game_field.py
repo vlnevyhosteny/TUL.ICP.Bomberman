@@ -319,3 +319,28 @@ class GameField(object):
         """
         while self.queue:
             self._dequeue()
+
+    def check_if_figure_collide(self, position_x, position_z):
+        position_x_in_tolerance = position_x
+        position_z_in_tolerance = position_z
+
+        if position_x < 0:
+            position_x_in_tolerance -= 0.1
+        else:
+            position_x_in_tolerance += 0.1
+
+        if position_z < 0:
+            position_z_in_tolerance -= 0.1
+        else:
+            position_z_in_tolerance += 0.1
+
+        x = get_int_from_float(position_x_in_tolerance)
+        y = 0
+        z = get_int_from_float(position_z_in_tolerance)
+
+        borders = HALF_OF_FIELD_SIZE - 1
+
+        if self._shown.get((x, y, z)) is not None or math.fabs(position_x) > borders or math.fabs(position_z) > borders:
+            return True
+        else:
+            return False

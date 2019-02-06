@@ -184,17 +184,24 @@ class Window(pyglet.window.Window):
         distance = dt * WALKING_SPEED  # distance covered this tick.
 
         if self.strafe[0] != 0 or self.strafe[1] != 0:
-            if self.strafe[0] == 1:  # top
-                self.model.player_figure.position_x += distance
+            new_x = self.model.player_figure.position_x
+            new_z = self.model.player_figure.position_z
+
+            if self.strafe[0] == 1:  # right
+                new_x += distance
             elif self.strafe[0] == -1:
-                self.model.player_figure.position_x -= distance
+                new_x -= distance
 
-            if self.strafe[1] == 1:  # right
-                self.model.player_figure.position_z += distance
+            if self.strafe[1] == 1:  # top
+                new_z += distance
             elif self.strafe[1] == -1:
-                self.model.player_figure.position_z -= distance
+                new_z -= distance
 
-            self.model.player_figure.recalculate_vertices()
+            if not self.model.check_if_figure_collide(new_x, new_z):
+                self.model.player_figure.position_x = new_x
+                self.model.player_figure.position_z = new_z
+
+                self.model.player_figure.recalculate_vertices()
 
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`

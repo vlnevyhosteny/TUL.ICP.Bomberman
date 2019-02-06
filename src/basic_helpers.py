@@ -16,6 +16,10 @@ def cube_vertices(x, y, z, n):
     ]
 
 
+def get_int_from_float(float_nr):
+    return int(math.modf(float_nr)[1])
+
+
 def tex_coord(x, y, n=4):
     """ Return the bounding vertices of the texture square.
 
