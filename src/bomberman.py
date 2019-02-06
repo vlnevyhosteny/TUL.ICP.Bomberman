@@ -294,13 +294,13 @@ class Window(pyglet.window.Window):
         if symbol == key.W:
             self.strafe[1] = 1
 
-        elif symbol == key.S:
+        if symbol == key.S:
             self.strafe[1] = -1
 
-        elif symbol == key.A:
+        if symbol == key.A:
             self.strafe[0] = 1
 
-        elif symbol == key.D:
+        if symbol == key.D:
             self.strafe[0] = -1
 
         elif symbol == key.SPACE:
@@ -339,13 +339,13 @@ class Window(pyglet.window.Window):
         if symbol == key.W:
             self.strafe[1] = 0
 
-        elif symbol == key.S:
+        if symbol == key.S:
             self.strafe[1] = 0
 
-        elif symbol == key.A:
+        if symbol == key.A:
             self.strafe[0] = 0
 
-        elif symbol == key.D:
+        if symbol == key.D:
             self.strafe[0] = 0
 
         elif symbol == key.RIGHT:
