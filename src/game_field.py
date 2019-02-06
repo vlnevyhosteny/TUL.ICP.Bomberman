@@ -5,6 +5,7 @@ from past.builtins import xrange
 from pyglet import *
 from pyglet.gl import *
 from pyglet.graphics import TextureGroup
+from pyglet.resource import texture
 
 from src.basic_helpers import *
 from src.game_config import *
@@ -76,6 +77,8 @@ class GameField(object):
                     for dy in xrange(0, 1):
                         self.add_block((x, y + dy, z), STONE, immediate=False)
 
+        self.show_figures(([self.player_figure] + self.npc_figures))
+
     def exposed(self, position):
         """ Returns False is given `position` is surrounded on all 6 sides by
         blocks, True otherwise.
@@ -89,6 +92,15 @@ class GameField(object):
                 return True
 
         return False
+
+    def show_figures(self, figures):
+        for figure in figures:
+            x, z = figure.position_x, figure.position_z
+            vertex_data = cube_vertices(x, 0, z, 0.25)
+            texture_data = list(BRICK)
+
+            # create vertex list
+            self.batch.add(24, GL_QUADS, self.group, ('v3f/static', vertex_data), ('t2f/static', texture_data))
 
     def add_block(self, position, texture, immediate=True):
         """ Add a block with the given `texture` and `position` to the world.

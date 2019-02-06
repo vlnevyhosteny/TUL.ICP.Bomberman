@@ -98,30 +98,12 @@ class Window(pyglet.window.Window):
 
         """
         if any(self.strafe):
-            x, y = self.rotation
             strafe = math.degrees(math.atan2(*self.strafe))
-            y_angle = math.radians(y)
-            x_angle = math.radians(x + strafe)
+            x_angle = math.radians(strafe)
 
-            if self.flying:
-                m = math.cos(y_angle)
-                dy = math.sin(y_angle)
-
-                if self.strafe[1]:
-                    # Moving left or right.
-                    dy = 0.0
-                    m = 1
-                if self.strafe[0] > 0:
-                    # Moving backwards.
-                    dy *= -1
-                # When you are flying up or down, you have less left and right
-                # motion.
-                dx = math.cos(x_angle) * m
-                dz = math.sin(x_angle) * m
-            else:
-                dy = 0.0
-                dx = math.cos(x_angle)
-                dz = math.sin(x_angle)
+            dy = 0.0
+            dx = math.cos(x_angle)
+            dz = math.sin(x_angle)
 
         else:
             dy = 0.0
@@ -213,12 +195,11 @@ class Window(pyglet.window.Window):
 
         """
         # walking
-        #speed = FLYING_SPEED if self.flying else WALKING_SPEED
-        #d = dt * speed  # distance covered this tick.
-        #dx, dy, dz = self.get_motion_vector()
+        speed = WALKING_SPEED
+        distance = dt * speed  # distance covered this tick.
+        dx, dy, dz = self.get_motion_vector()
         # New position in space, before accounting for gravity.
-        #dx, dy, dz = dx * d, dy * d, dz * d
-        # gravity
+        dx, dy, dz = dx * distance, dy * distance, dz * distance
 
         self.if_needed_rotate_horizontally()
         self.if_needed_rotate_vertically()
