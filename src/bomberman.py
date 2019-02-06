@@ -87,31 +87,6 @@ class Window(pyglet.window.Window):
         dz = math.sin(math.radians(x - 90)) * m
         return dx, dy, dz
 
-    def get_motion_vector(self):
-        """ Returns the current motion vector indicating the velocity of the
-        player.
-
-        Returns
-        -------
-        vector : tuple of len 3
-            Tuple containing the velocity in x, y, and z respectively.
-
-        """
-        if any(self.strafe):
-            strafe = math.degrees(math.atan2(*self.strafe))
-            x_angle = math.radians(strafe)
-
-            dy = 0.0
-            dx = math.cos(x_angle)
-            dz = math.sin(x_angle)
-
-        else:
-            dy = 0.0
-            dx = 0.0
-            dz = 0.0
-
-        return dx, dy, dz
-
     def if_needed_rotate_horizontally(self):
         if self.rotate_horizontally != 0:
             if self.rotate_horizontally == 1:  # right
@@ -194,12 +169,7 @@ class Window(pyglet.window.Window):
             The change in time since the last call.
 
         """
-        # walking
-        speed = WALKING_SPEED
-        distance = dt * speed  # distance covered this tick.
-        dx, dy, dz = self.get_motion_vector()
-        # New position in space, before accounting for gravity.
-        dx, dy, dz = dx * distance, dy * distance, dz * distance
+        self.move_figures(dt)
 
         self.if_needed_rotate_horizontally()
         self.if_needed_rotate_vertically()
@@ -209,6 +179,22 @@ class Window(pyglet.window.Window):
             self.position = (STARTING_POSITION_X, STARTING_POSITION_Y, STARTING_POSITION_Z)
             self.rotation = (STARTING_ROTATION_X, STARTING_ROTATION_Y)
             self.reset_spectator = False
+
+    def move_figures(self, dt):
+        distance = dt * WALKING_SPEED  # distance covered this tick.
+
+        if self.strafe[0] != 0 or self.strafe[1] != 0:
+            if self.strafe[0] == 1:  # top
+                self.model.player_figure.position_x += distance
+            elif self.strafe[0] == -1:
+                self.model.player_figure.position_x -= distance
+
+            if self.strafe[1] == 1:  # right
+                self.model.player_figure.position_z += distance
+            elif self.strafe[1] == -1:
+                self.model.player_figure.position_z -= distance
+
+            self.model.player_figure.recalculate_vertices()
 
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`
@@ -299,16 +285,16 @@ class Window(pyglet.window.Window):
 
         """
         if symbol == key.W:
-            self.strafe[0] -= 0  # 1
+            self.strafe[1] = 1
 
         elif symbol == key.S:
-            self.strafe[0] += 0  # 1
+            self.strafe[1] = -1
 
         elif symbol == key.A:
-            self.strafe[1] -= 0  # 1
+            self.strafe[0] = 1
 
         elif symbol == key.D:
-            self.strafe[1] += 0  # 1
+            self.strafe[0] = -1
 
         elif symbol == key.SPACE:
             pass
@@ -344,16 +330,16 @@ class Window(pyglet.window.Window):
 
         """
         if symbol == key.W:
-            self.strafe[0] += 0  # 1
+            self.strafe[1] = 0
 
         elif symbol == key.S:
-            self.strafe[0] -= 0  # 1
+            self.strafe[1] = 0
 
         elif symbol == key.A:
-            self.strafe[1] += 0  # 1
+            self.strafe[0] = 0
 
         elif symbol == key.D:
-            self.strafe[1] -= 0  # 1
+            self.strafe[0] = 0
 
         elif symbol == key.RIGHT:
             self.rotate_horizontally = 0

@@ -100,7 +100,7 @@ class GameField(object):
             texture_data = list(BRICK)
 
             # create vertex list
-            self.batch.add(24, GL_QUADS, self.group, ('v3f/static', vertex_data), ('t2f/static', texture_data))
+            figure.gl_object = self.batch.add(24, GL_QUADS, self.group, ('v3f/dynamic', vertex_data), ('t2f/static', texture_data))
 
     def add_block(self, position, texture, immediate=True):
         """ Add a block with the given `texture` and `position` to the world.
