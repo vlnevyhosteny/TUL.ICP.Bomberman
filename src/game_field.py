@@ -19,7 +19,8 @@ class GameField(object):
     def __init__(self):
 
         # A Batch is a collection of vertex lists for batched rendering.
-        self.batch = pyglet.graphics.Batch()
+        self.main_batch = pyglet.graphics.Batch()
+        self.bomb_batch = pyglet.graphics.Batch()
 
         # A TextureGroup manages an OpenGL texture.
         self.group = TextureGroup(image.load(TEXTURE_PATH).get_texture())
@@ -41,7 +42,7 @@ class GameField(object):
         # _show_block() and _hide_block() calls
         self.queue = deque()
 
-        self.bombs = {}
+        self.bombs = []
 
         self.player_figure, self.npc_figures = self._initialize_figures()
 
@@ -102,7 +103,7 @@ class GameField(object):
             texture_data = list(BRICK)
 
             # create vertex list
-            figure.gl_object = self.batch.add(24, GL_QUADS, self.group, ('v3f/dynamic', vertex_data), ('t2f/static', texture_data))
+            figure.gl_object = self.main_batch.add(24, GL_QUADS, self.group, ('v3f/dynamic', vertex_data), ('t2f/static', texture_data))
 
     def add_block(self, position, texture, immediate=True):
         """ Add a block with the given `texture` and `position` to the world.
@@ -209,8 +210,8 @@ class GameField(object):
         texture_data = list(texture)
 
         # create vertex list
-        self._shown[position] = self.batch.add(24, GL_QUADS, self.group, ('v3f/static', vertex_data),
-                                               ('t2f/static', texture_data))
+        self._shown[position] = self.main_batch.add(24, GL_QUADS, self.group, ('v3f/static', vertex_data),
+                                                    ('t2f/static', texture_data))
 
     def hide_block(self, position, immediate=True):
         """ Hide the block at the given `position`. Hiding does not remove the
@@ -236,6 +237,13 @@ class GameField(object):
 
         """
         self._shown.pop(position).delete()
+
+    def draw_bomb(self, bomb):
+        x, y, z = bomb.position_x, 1, bomb.position_z
+        vertex_data = cube_vertices(x, y, z, 0.5)
+        texture_data = list(STONE)
+
+        return pyglet.graphics.draw(24, GL_QUADS, ('v3f/static', vertex_data), ('t2f/static', texture_data))
 
     def show_sector(self, sector):
         """ Ensure all blocks in the given sector that should be shown are

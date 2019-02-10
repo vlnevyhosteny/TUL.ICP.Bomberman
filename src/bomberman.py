@@ -51,6 +51,8 @@ class Window(pyglet.window.Window):
         # Velocity in the y (upward) direction.
         self.dy = 0
 
+        self.player_wants_place_bomb = False
+
         # Instance of the model that handles the world.
         self.model = GameField()
 
@@ -170,6 +172,7 @@ class Window(pyglet.window.Window):
 
         """
         self.move_figures(dt)
+        self.place_bombs()
 
         self.if_needed_rotate_horizontally()
         self.if_needed_rotate_vertically()
@@ -202,6 +205,19 @@ class Window(pyglet.window.Window):
                 self.model.player_figure.position_z = new_z
 
                 self.model.player_figure.recalculate_vertices()
+
+    def place_bombs(self):
+        if self.player_wants_place_bomb:
+            new_bomb = self.model.player_figure.place_bomb()
+
+            if new_bomb is not None:  # Can be None in case of unable to place bomb
+                new_bomb.gl_bomb = self.model.draw_bomb(new_bomb)
+                new_bomb.timer = pyglet.clock.schedule_once(new_bomb.detonation, new_bomb.timespan)
+                self.model.bombs.append(new_bomb)
+
+                self.model.bomb_batch.draw()
+
+        self.player_wants_place_bomb = False
 
     def on_mouse_motion(self, x, y, dx, dy):
         """ Called when the player moves the mouse.
@@ -250,7 +266,7 @@ class Window(pyglet.window.Window):
             self.strafe[0] = -1
 
         elif symbol == key.SPACE:
-            pass
+            self.player_wants_place_bomb = True
 
         elif symbol == key.ESCAPE:
             self.set_exclusive_mouse(False)
@@ -360,7 +376,8 @@ class Window(pyglet.window.Window):
         self.clear()
         self.set_3d()
         glColor3d(1, 1, 1)
-        self.model.batch.draw()
+        self.model.main_batch.draw()
+        self.model.bomb_batch.draw()
         self.set_2d()
         self.draw_label()
 
