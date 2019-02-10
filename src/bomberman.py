@@ -203,60 +203,6 @@ class Window(pyglet.window.Window):
 
                 self.model.player_figure.recalculate_vertices()
 
-    def collide(self, position, height):
-        """ Checks to see if the player at the given `position` and `height`
-        is colliding with any blocks in the world.
-
-        Parameters
-        ----------
-        position : tuple of len 3
-            The (x, y, z) position to check for collisions at.
-        height : int or float
-            The height of the player.
-
-        Returns
-        -------
-        position : tuple of len 3
-            The new position of the player taking into account collisions.
-
-        """
-        # How much overlap with a dimension of a surrounding block you need to
-        # have to count as a collision. If 0, touching terrain at all counts as
-        # a collision. If .49, you sink into the ground, as if walking through
-        # tall grass. If >= .5, you'll fall through the ground.
-        pad = 0.25
-        p = list(position)
-        np = normalize(position)
-
-        for face in FACES:  # check all surrounding blocks
-            for i in xrange(3):  # check each dimension independently
-
-                if not face[i]:
-                    continue
-
-                # How much overlap you have with this dimension.
-                d = (p[i] - np[i]) * face[i]
-                if d < pad:
-                    continue
-
-                for dy in xrange(height):  # check each height
-
-                    op = list(np)
-                    op[1] -= dy
-                    op[i] += face[i]
-                    if tuple(op) not in self.model.world:
-                        continue
-
-                    p[i] -= (d - pad) * face[i]
-
-                    if face == (0, -1, 0) or face == (0, 1, 0):
-                        # You are colliding with the ground or ceiling, so stop
-                        # falling / rising.
-                        self.dy = 0
-                    break
-
-        return tuple(p)
-
     def on_mouse_motion(self, x, y, dx, dy):
         """ Called when the player moves the mouse.
 

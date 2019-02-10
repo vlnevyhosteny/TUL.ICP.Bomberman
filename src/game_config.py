@@ -29,3 +29,6 @@ FACES = [
 ]
 
 TEXTURE_PATH = 'texture.png'
+
+BOMB_STARTING_RANGE = 2
+BOMB_TIMESPAN_SECS = 3

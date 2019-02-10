@@ -41,6 +41,8 @@ class GameField(object):
         # _show_block() and _hide_block() calls
         self.queue = deque()
 
+        self.bombs = {}
+
         self.player_figure, self.npc_figures = self._initialize_figures()
 
         self._initialize()
