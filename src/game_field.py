@@ -12,6 +12,7 @@ from src.game_config import *
 from src.npc_figure import NPCFigure
 from src.player_figure import PlayerFigure
 from src.textures import *
+from collections import deque
 
 
 class GameField(object):
@@ -42,7 +43,7 @@ class GameField(object):
         # _show_block() and _hide_block() calls
         self.queue = deque()
 
-        self.bombs = []
+        self.bombs = deque([])
 
         self.player_figure, self.npc_figures = self._initialize_figures()
 
@@ -237,6 +238,29 @@ class GameField(object):
 
         """
         self._shown.pop(position).delete()
+
+    def detonation(self, dt):
+        if len(self.bombs) > 0:
+            bomb = self.bombs.popleft()
+            _range = bomb.range
+
+            foo = xrange((bomb.position_x - _range), (bomb.position_x + _range))
+
+            for dx in xrange((bomb.position_x - _range), (bomb.position_x + _range)):
+                block = self.shown.get((dx, 0, bomb.position_z))
+
+                if block is not None and block == GRASS:
+                    self.hide_block((dx, 0, bomb.position_z))
+
+            for dz in xrange(bomb.position_z - _range, bomb.position_z + _range):
+                block = self.shown.get((bomb.position_x, 0, dz))
+
+                if block is not None and block == GRASS:
+                    self.hide_block((bomb.position_x, 0, dz))
+
+            bomb.figure.placed_bombs -= 1
+
+            del bomb
 
     def draw_bomb(self, bomb):
         x, y, z = bomb.position_x, 1, bomb.position_z

@@ -212,10 +212,8 @@ class Window(pyglet.window.Window):
 
             if new_bomb is not None:  # Can be None in case of unable to place bomb
                 new_bomb.gl_bomb = self.model.draw_bomb(new_bomb)
-                new_bomb.timer = pyglet.clock.schedule_once(new_bomb.detonation, new_bomb.timespan)
+                new_bomb.timer = pyglet.clock.schedule_once(self.model.detonation, new_bomb.timespan)
                 self.model.bombs.append(new_bomb)
-
-                self.model.bomb_batch.draw()
 
         self.player_wants_place_bomb = False
 
