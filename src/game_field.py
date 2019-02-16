@@ -355,26 +355,27 @@ class GameField(object):
             self._dequeue()
 
     def check_if_figure_collide(self, position_x, position_z):
-        position_x_in_tolerance = position_x
-        position_z_in_tolerance = position_z
+        figure_size_half = 0.25
 
-        if position_x < 0:
-            position_x_in_tolerance -= 0.1
-        else:
-            position_x_in_tolerance += 0.1
+        position_x_left = round(position_x + figure_size_half)
+        position_x_right = round(position_x - figure_size_half)
+        position_z_top = round(position_z + figure_size_half)
+        position_z_bottom = round(position_z - figure_size_half)
 
-        if position_z < 0:
-            position_z_in_tolerance -= 0.1
-        else:
-            position_z_in_tolerance += 0.1
-
-        x = get_int_from_float(position_x_in_tolerance)
+        x = get_int_from_float(position_x)
         y = 0
-        z = get_int_from_float(position_z_in_tolerance)
+        z = get_int_from_float(position_z)
 
         borders = HALF_OF_FIELD_SIZE - 1
 
-        if self._shown.get((x, y, z)) is not None or math.fabs(position_x) > borders or math.fabs(position_z) > borders:
+        if math.fabs(position_x) - 0.25 > borders or math.fabs(position_z) - 0.25 > borders:
             return True
         else:
-            return False
+            left_collide = self._shown.get((position_x_left, 0, get_int_from_float(z))) is not None
+            right_collide = self._shown.get(
+                (position_x_right, 0, get_int_from_float(z))) is not None
+            top_collide = self._shown.get((get_int_from_float(x), 0, position_z_top)) is not None
+            bottom_collide = self._shown.get(
+                (get_int_from_float(x), 0, position_z_bottom)) is not None
+
+            return left_collide or right_collide or top_collide or bottom_collide

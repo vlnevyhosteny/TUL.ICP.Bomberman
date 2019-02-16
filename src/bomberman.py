@@ -385,8 +385,8 @@ class Window(pyglet.window.Window):
         """
         x, y, z = self.position
         self.label.text = '%02d (%.2f, %.2f, %.2f) (%.2f, %.2f) %d / %d' % (
-            pyglet.clock.get_fps(), x, y, z, self.rotation[0], self.rotation[1],
-            len(self.model._shown), len(self.model.world))
+            pyglet.clock.get_fps(), self.model.player_figure.position_x, 0, self.model.player_figure.position_z,
+            self.rotation[0], self.rotation[1], len(self.model._shown), len(self.model.world))
 
         self.label.draw()
 
