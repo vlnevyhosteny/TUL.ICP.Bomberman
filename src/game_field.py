@@ -239,21 +239,52 @@ class GameField(object):
         """
         self._shown.pop(position).delete()
 
+    def check_if_hit_npcs(self, x, z):
+        hit_npcs = []
+
+        for npc in self.npc_figures:
+            if get_int_from_float(npc.position_x) == x and get_int_from_float(npc.position_z) == z:
+                hit_npcs.append(npc)
+
+        return hit_npcs
+
+    def check_if_hit_player(self, x, z):
+        return get_int_from_float(self.player_figure.position_x) == x \
+               and get_int_from_float(self.player_figure.position_z) == z
+
+    def remove_figures(self, figures):
+        for figure in figures:
+            self.remove_figure(figure)
+
+    def remove_figure(self, figure):
+        figure.gl_object.delete()
+        figure.hit = True
+
     def detonation(self, dt):
         if len(self.bombs) > 0:
             bomb = self.bombs.popleft()
             _range = bomb.range
 
-            foo = xrange((bomb.position_x - _range), (bomb.position_x + _range))
-
             for dx in xrange((bomb.position_x - _range), (bomb.position_x + _range)):
                 block = self.shown.get((dx, 0, bomb.position_z))
+
+                hit_npcs = self.check_if_hit_npcs(dx, bomb.position_z)
+                self.remove_figures(hit_npcs)
+
+                if self.check_if_hit_player(dx, bomb.position_z):
+                    self.player_figure.hit = True
 
                 if block is not None and block == GRASS:
                     self.hide_block((dx, 0, bomb.position_z))
 
             for dz in xrange(bomb.position_z - _range, bomb.position_z + _range):
                 block = self.shown.get((bomb.position_x, 0, dz))
+
+                hit_npcs = self.check_if_hit_npcs(bomb.position_x, dz)
+                self.remove_figures(hit_npcs)
+
+                if self.check_if_hit_player(bomb.position_x, dz):
+                    self.player_figure.hit = True
 
                 if block is not None and block == GRASS:
                     self.hide_block((bomb.position_x, 0, dz))

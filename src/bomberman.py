@@ -53,6 +53,8 @@ class Window(pyglet.window.Window):
 
         self.player_wants_place_bomb = False
 
+        self.game_stopped = False
+
         # Instance of the model that handles the world.
         self.model = GameField()
 
@@ -134,6 +136,16 @@ class Window(pyglet.window.Window):
 
             self.position = x, y, z
 
+    def game_over(self):
+        print('game over!')
+
+        pass
+
+    def game_win(self):
+        print('game win!')
+
+        pass
+
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
         clock.
@@ -171,6 +183,9 @@ class Window(pyglet.window.Window):
             The change in time since the last call.
 
         """
+        if all(figure.hit for figure in self.model.npc_figures): self.game_win()
+        if self.model.player_figure.hit: self.game_over()
+
         self.move_figures(dt)
         self.place_bombs()
 

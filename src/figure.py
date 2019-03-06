@@ -10,6 +10,7 @@ class BaseFigure:
         self.gl_object = None
         self.bomb_count = 1
         self.placed_bombs = 0
+        self.hit = False
 
     def recalculate_vertices(self):
         if self.gl_object is not None:
