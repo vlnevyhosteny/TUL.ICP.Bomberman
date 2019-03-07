@@ -62,6 +62,9 @@ class Window(pyglet.window.Window):
         self.label = pyglet.text.Label('', font_name='Arial', font_size=18,
                                        x=10, y=self.height - 10, anchor_x='left', anchor_y='top', color=(0, 0, 0, 255))
 
+        self.status = pyglet.text.Label('', font_name='Arial', font_size=50, x=self.width//2, y=self.height//2,
+                                        anchor_x='center', anchor_y='center', color=(0, 0, 0, 255))
+
         # This call schedules the `update()` method to be called
         # TICKS_PER_SEC. This is the main game event loop.
         pyglet.clock.schedule_interval(self.update, 1.0 / TICKS_PER_SEC)
@@ -137,14 +140,12 @@ class Window(pyglet.window.Window):
             self.position = x, y, z
 
     def game_over(self):
-        print('game over!')
-
-        pass
+        self.status.text = 'Game Over!'
+        self.game_stopped = True
 
     def game_win(self):
-        print('game win!')
-
-        pass
+        self.status.text = 'Win!'
+        self.game_stopped = True
 
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
@@ -222,7 +223,7 @@ class Window(pyglet.window.Window):
                 self.model.player_figure.recalculate_vertices()
 
     def place_bombs(self):
-        if self.player_wants_place_bomb:
+        if self.player_wants_place_bomb and not self.game_stopped:
             new_bomb = self.model.player_figure.place_bomb()
 
             if new_bomb is not None:  # Can be None in case of unable to place bomb
@@ -393,6 +394,7 @@ class Window(pyglet.window.Window):
         self.model.bomb_batch.draw()
         self.set_2d()
         self.draw_label()
+        self.status.draw()
 
     def draw_label(self):
         """ Draw the label in the top left of the screen.
