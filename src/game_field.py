@@ -265,8 +265,13 @@ class GameField(object):
             bomb = self.bombs.popleft()
             _range = bomb.range
 
-            for dx in xrange((bomb.position_x - _range), (bomb.position_x + _range)):
+            for dx in range(bomb.position_x, (bomb.position_x - _range), -1):
                 block = self.shown.get((dx, 0, bomb.position_z))
+                if block is not None:
+                    if block == GRASS:
+                        self.hide_block((dx, 0, bomb.position_z))
+                    elif block == STONE:
+                        break
 
                 hit_npcs = self.check_if_hit_npcs(dx, bomb.position_z)
                 self.remove_figures(hit_npcs)
@@ -274,11 +279,27 @@ class GameField(object):
                 if self.check_if_hit_player(dx, bomb.position_z):
                     self.player_figure.hit = True
 
-                if block is not None and block == GRASS:
-                    self.hide_block((dx, 0, bomb.position_z))
+            for dx in range(bomb.position_x, (bomb.position_x + _range - 1), 1):
+                block = self.shown.get((dx, 0, bomb.position_z))
+                if block is not None:
+                    if block == GRASS:
+                        self.hide_block((dx, 0, bomb.position_z))
+                    elif block == STONE:
+                        break
 
-            for dz in xrange(bomb.position_z - _range, bomb.position_z + _range):
+                hit_npcs = self.check_if_hit_npcs(dx, bomb.position_z)
+                self.remove_figures(hit_npcs)
+
+                if self.check_if_hit_player(dx, bomb.position_z):
+                    self.player_figure.hit = True
+
+            for dz in range(bomb.position_z, bomb.position_z - _range, -1):
                 block = self.shown.get((bomb.position_x, 0, dz))
+                if block is not None:
+                    if block == GRASS:
+                        self.hide_block((bomb.position_x, 0, dz))
+                    elif block == STONE:
+                        break
 
                 hit_npcs = self.check_if_hit_npcs(bomb.position_x, dz)
                 self.remove_figures(hit_npcs)
@@ -286,8 +307,19 @@ class GameField(object):
                 if self.check_if_hit_player(bomb.position_x, dz):
                     self.player_figure.hit = True
 
-                if block is not None and block == GRASS:
-                    self.hide_block((bomb.position_x, 0, dz))
+            for dz in range(bomb.position_z, bomb.position_z + _range - 1, 1):
+                block = self.shown.get((bomb.position_x, 0, dz))
+                if block is not None:
+                    if block == GRASS:
+                        self.hide_block((bomb.position_x, 0, dz))
+                    elif block == STONE:
+                        break
+
+                hit_npcs = self.check_if_hit_npcs(bomb.position_x, dz)
+                self.remove_figures(hit_npcs)
+
+                if self.check_if_hit_player(bomb.position_x, dz):
+                    self.player_figure.hit = True
 
             bomb.figure.placed_bombs -= 1
 
