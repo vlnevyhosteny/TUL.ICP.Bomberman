@@ -279,7 +279,7 @@ class GameField(object):
                 if self.check_if_hit_player(dx, bomb.position_z):
                     self.player_figure.hit = True
 
-            for dx in range(bomb.position_x, (bomb.position_x + _range - 1), 1):
+            for dx in range(bomb.position_x, (bomb.position_x + _range), 1):
                 block = self.shown.get((dx, 0, bomb.position_z))
                 if block is not None:
                     if block == GRASS:
@@ -307,7 +307,7 @@ class GameField(object):
                 if self.check_if_hit_player(bomb.position_x, dz):
                     self.player_figure.hit = True
 
-            for dz in range(bomb.position_z, bomb.position_z + _range - 1, 1):
+            for dz in range(bomb.position_z, bomb.position_z + _range, 1):
                 block = self.shown.get((bomb.position_x, 0, dz))
                 if block is not None:
                     if block == GRASS:
