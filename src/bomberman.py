@@ -202,7 +202,7 @@ class Window(pyglet.window.Window):
     def move_figures(self, dt):
         distance = dt * WALKING_SPEED  # distance covered this tick.
 
-        self.get_npcs_away_from_bomb_range(distance)
+        self.npcs_action(distance)
 
         if self.strafe[0] != 0 or self.strafe[1] != 0:
             new_x = self.model.player_figure.position_x
@@ -224,14 +224,22 @@ class Window(pyglet.window.Window):
 
                 self.model.player_figure.recalculate_vertices()
 
-    def get_npcs_away_from_bomb_range(self, distance):
+    def npcs_action(self, distance):
         for figure in self.model.npc_figures:
+            running_away = False
+
             for bomb in self.model.bombs:
                 if any(round(figure.position_x) == position[0] and
                        round(figure.position_z) == position[1]
                        for position in bomb.positions_affected_by_bomb):
 
-                    self.escape_with_figure(bomb, figure, distance)
+                    running_away = self.escape_with_figure(bomb, figure, distance)
+
+            if not running_away:
+                self.place_bombs_with_figure(figure, distance)
+
+    def place_bombs_with_figure(self, figure, distance):
+        pass
 
     def escape_with_figure(self, bomb, figure, distance):
         coef = 1
@@ -242,46 +250,48 @@ class Window(pyglet.window.Window):
             if not self.model.check_if_figure_collide(rounded_x + coef, figure.position_z):
                 figure.position_x += distance
                 figure.recalculate_vertices()
-                return
+                return True
 
             if not self.model.check_if_figure_collide(rounded_x - coef, figure.position_z):
                 figure.position_x -= distance
                 figure.recalculate_vertices()
-                return
+                return True
 
             if get_int_from_float(figure.position_z) >= bomb.position_z:
                 if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + coef):
                     figure.position_z += distance
                     figure.recalculate_vertices()
-                    return
+                    return True
             else:
                 if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - coef):
                     figure.position_z -= distance
                     figure.recalculate_vertices()
-                    return
+                    return True
         else:
             rounded_z = round(figure.position_z)
 
             if not self.model.check_if_figure_collide(figure.position_x, rounded_z + coef):
                 figure.position_z += distance
                 figure.recalculate_vertices()
-                return
+                return True
 
             if not self.model.check_if_figure_collide(figure.position_x, rounded_z - coef):
                 figure.position_z -= distance
                 figure.recalculate_vertices()
-                return
+                return True
 
             if get_int_from_float(figure.position_x) >= bomb.position_x:
                 if not self.model.check_if_figure_collide(figure.position_x + coef, figure.position_z):
                     figure.position_x += distance
                     figure.recalculate_vertices()
-                    return
+                    return True
             else:
                 if not self.model.check_if_figure_collide(figure.position_x - coef, figure.position_z):
                     figure.position_x -= distance
                     figure.recalculate_vertices()
-                    return
+                    return True
+
+        return False
 
     def place_bombs(self):
         if self.player_wants_place_bomb and not self.game_stopped:
