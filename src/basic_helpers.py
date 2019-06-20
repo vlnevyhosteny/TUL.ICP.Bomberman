@@ -1,4 +1,7 @@
 import math
+
+from past.builtins import xrange
+
 from src.game_config import *
 
 
@@ -119,3 +122,17 @@ def rotate(origin, point, angle):
     qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
 
     return qx, qy
+
+
+def get_positions_list():
+    n = HALF_OF_FIELD_SIZE
+    s = 1  # step size
+    y = 0  # initial y height
+
+    result = []
+
+    for x in xrange(-n, n + 1, s):
+        for z in xrange(-n, n + 1, s):
+            result.append((x, y, z))
+
+    return result
