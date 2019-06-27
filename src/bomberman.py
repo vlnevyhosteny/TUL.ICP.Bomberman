@@ -1,12 +1,12 @@
 from __future__ import division
 
-from past.builtins import xrange
 from pyglet.gl import *
 from pyglet.window import key
 
 from src.basic_helpers import *
 from src.game_field import GameField
 from src.game_config import *
+from src.tracing_helper import TracingHelper
 
 
 class Window(pyglet.window.Window):
@@ -239,7 +239,49 @@ class Window(pyglet.window.Window):
                 self.place_bombs_with_figure(figure, distance)
 
     def place_bombs_with_figure(self, figure, distance):
-        pass
+        coef = 0.5
+
+        path = self.model.tracing_helper\
+            .do_dijkstra((figure.position_x, 0, figure.position_z),
+                         (self.model.player_figure.position_x, 0, self.model.player_figure.position_z))
+
+        x, z = self.model.tracing_helper.get_direction_from_path(path)
+
+        if x == -1:
+            rounded_x = round(figure.position_x - distance)
+
+            if not self.model.check_if_figure_collide(rounded_x - coef, figure.position_z):
+                figure.position_x -= distance
+                figure.recalculate_vertices()
+            else:
+                return self.npc_place_bomb(figure)
+
+        if x == 1:
+            rounded_x = round(figure.position_x + distance)
+
+            if not self.model.check_if_figure_collide(rounded_x + coef, figure.position_z):
+                figure.position_x += distance
+                figure.recalculate_vertices()
+            else:
+                return self.npc_place_bomb(figure)
+
+        if z == -1:
+            rounded_z = round(figure.position_z - distance)
+
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - coef):
+                figure.position_z -= distance
+                figure.recalculate_vertices()
+            else:
+                return self.npc_place_bomb(figure)
+
+        if z == 1:
+            rounded_z = round(figure.position_z + distance)
+
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + coef):
+                figure.position_z += distance
+                figure.recalculate_vertices()
+            else:
+                return self.npc_place_bomb(figure)
 
     def escape_with_figure(self, bomb, figure, distance):
         coef = 1
@@ -305,6 +347,18 @@ class Window(pyglet.window.Window):
                 self.model.bombs.append(new_bomb)
 
         self.player_wants_place_bomb = False
+
+    def npc_place_bomb(self, figure):
+        if not self.game_stopped:
+            new_bomb = figure.place_bomb()
+
+            if new_bomb is not None:
+                new_bomb.calculate_affection_of_bomb(self.model._shown)
+
+                new_bomb.gl_bomb = self.model.draw_bomb(new_bomb)
+                new_bomb.timer = pyglet.clock.schedule_once(self.model.detonation, new_bomb.timespan)
+                self.model.bombs.append(new_bomb)
+
 
     def on_mouse_motion(self, x, y, dx, dy):
         """ Called when the player moves the mouse.

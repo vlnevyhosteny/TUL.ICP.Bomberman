@@ -1,11 +1,8 @@
 import time
-from collections import deque
 
-from past.builtins import xrange
 from pyglet import *
 from pyglet.gl import *
 from pyglet.graphics import TextureGroup
-from pyglet.resource import texture
 
 from src.basic_helpers import *
 from src.game_config import *
@@ -13,6 +10,8 @@ from src.npc_figure import NPCFigure
 from src.player_figure import PlayerFigure
 from src.textures import *
 from collections import deque
+
+from src.tracing_helper import TracingHelper
 
 
 class GameField(object):
@@ -44,6 +43,8 @@ class GameField(object):
         self.queue = deque()
 
         self.bombs = deque([])
+
+        self.tracing_helper = TracingHelper(self)
 
         self.player_figure, self.npc_figures = self._initialize_figures()
 
@@ -322,6 +323,8 @@ class GameField(object):
                     self.player_figure.hit = True
 
             bomb.figure.placed_bombs -= 1
+
+            self.tracing_helper = TracingHelper(self)
 
             del bomb
 
