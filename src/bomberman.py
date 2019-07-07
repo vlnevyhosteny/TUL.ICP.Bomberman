@@ -284,51 +284,76 @@ class Window(pyglet.window.Window):
                 return self.npc_place_bomb(figure)
 
     def escape_with_figure(self, bomb, figure, distance):
-        if get_int_from_float(figure.position_x) == bomb.position_x:
-            rounded_x = round(figure.position_x)
+        if figure.previous_direction is not None:
+            x, z = figure.previous_direction
+            x *= distance
+            z *= distance
 
-            if not self.model.check_if_figure_collide(rounded_x + distance, figure.position_z):
-                figure.position_x += distance
+            if not self.model.check_if_figure_collide(figure.position_x + x, figure.position_z + z):
+                figure.position_x += x
+                figure.position_z += z
                 figure.recalculate_vertices()
                 return True
+            else:
+                figure.previous_direction = None
 
-            if not self.model.check_if_figure_collide(rounded_x - distance, figure.position_z):
+        if get_int_from_float(figure.position_x) == bomb.position_x:
+            if not self.model.check_if_figure_collide(figure.position_x + 3 * distance, figure.position_z):
+                figure.position_x += distance
+                figure.recalculate_vertices()
+
+                figure.previous_direction = 1, 0
+                return True
+
+            if not self.model.check_if_figure_collide(figure.position_x - 3 * distance, figure.position_z):
                 figure.position_x -= distance
                 figure.recalculate_vertices()
+
+                figure.previous_direction = -1, 0
                 return True
 
             if get_int_from_float(figure.position_z) >= bomb.position_z:
-                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + distance):
+                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + 3 * distance):
                     figure.position_z += distance
                     figure.recalculate_vertices()
+
+                    figure.previous_direction = 0, 1
                     return True
             else:
-                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - distance):
+                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - 3 * distance):
                     figure.position_z -= distance
                     figure.recalculate_vertices()
+
+                    figure.previous_direction = 0, -1
                     return True
         else:
-            rounded_z = round(figure.position_z)
-
-            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + distance):
+            if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + 3 * distance):
                 figure.position_z += distance
                 figure.recalculate_vertices()
+
+                figure.previous_direction = 0, 1
                 return True
 
-            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - distance):
+            if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - 3 * distance):
                 figure.position_z -= distance
                 figure.recalculate_vertices()
+
+                figure.previous_direction = 0, -1
                 return True
 
             if get_int_from_float(figure.position_x) >= bomb.position_x:
-                if not self.model.check_if_figure_collide(figure.position_x + distance, figure.position_z):
+                if not self.model.check_if_figure_collide(figure.position_x + 3 * distance, figure.position_z):
                     figure.position_x += distance
                     figure.recalculate_vertices()
+
+                    figure.previous_direction = 1, 0
                     return True
             else:
-                if not self.model.check_if_figure_collide(figure.position_x - distance, figure.position_z):
+                if not self.model.check_if_figure_collide(figure.position_x - 3 * distance, figure.position_z):
                     figure.position_x -= distance
                     figure.recalculate_vertices()
+
+                    figure.previous_direction = -1, 0
                     return True
 
         return False
@@ -352,6 +377,8 @@ class Window(pyglet.window.Window):
 
             if new_bomb is not None:
                 new_bomb.calculate_affection_of_bomb(self.model._shown)
+
+                figure.previous_direction = None
 
                 new_bomb.gl_bomb = self.model.draw_bomb(new_bomb)
                 new_bomb.timer = pyglet.clock.schedule_once(self.model.detonation, new_bomb.timespan)
