@@ -258,7 +258,7 @@ class GameField(object):
             self.remove_figure(figure)
 
     def remove_figure(self, figure):
-        figure.gl_object.delete()
+        # figure.gl_object.delete()
         figure.hit = True
 
     def detonation(self, dt):

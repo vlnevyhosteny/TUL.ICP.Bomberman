@@ -284,51 +284,49 @@ class Window(pyglet.window.Window):
                 return self.npc_place_bomb(figure)
 
     def escape_with_figure(self, bomb, figure, distance):
-        coef = 1
-
         if get_int_from_float(figure.position_x) == bomb.position_x:
             rounded_x = round(figure.position_x)
 
-            if not self.model.check_if_figure_collide(rounded_x + coef, figure.position_z):
+            if not self.model.check_if_figure_collide(rounded_x + distance, figure.position_z):
                 figure.position_x += distance
                 figure.recalculate_vertices()
                 return True
 
-            if not self.model.check_if_figure_collide(rounded_x - coef, figure.position_z):
+            if not self.model.check_if_figure_collide(rounded_x - distance, figure.position_z):
                 figure.position_x -= distance
                 figure.recalculate_vertices()
                 return True
 
             if get_int_from_float(figure.position_z) >= bomb.position_z:
-                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + coef):
+                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + distance):
                     figure.position_z += distance
                     figure.recalculate_vertices()
                     return True
             else:
-                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - coef):
+                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - distance):
                     figure.position_z -= distance
                     figure.recalculate_vertices()
                     return True
         else:
             rounded_z = round(figure.position_z)
 
-            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + coef):
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + distance):
                 figure.position_z += distance
                 figure.recalculate_vertices()
                 return True
 
-            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - coef):
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - distance):
                 figure.position_z -= distance
                 figure.recalculate_vertices()
                 return True
 
             if get_int_from_float(figure.position_x) >= bomb.position_x:
-                if not self.model.check_if_figure_collide(figure.position_x + coef, figure.position_z):
+                if not self.model.check_if_figure_collide(figure.position_x + distance, figure.position_z):
                     figure.position_x += distance
                     figure.recalculate_vertices()
                     return True
             else:
-                if not self.model.check_if_figure_collide(figure.position_x - coef, figure.position_z):
+                if not self.model.check_if_figure_collide(figure.position_x - distance, figure.position_z):
                     figure.position_x -= distance
                     figure.recalculate_vertices()
                     return True
