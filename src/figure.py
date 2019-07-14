@@ -11,6 +11,7 @@ class BaseFigure:
         self.bomb_count = 1
         self.placed_bombs = 0
         self.hit = False
+        self.previous_direction = None
 
     def recalculate_vertices(self):
         if self.gl_object is not None:
@@ -32,3 +33,18 @@ class BaseFigure:
     def remove_bomb(self, bomb):
         self.placed_bombs -= 1
 
+    def get_normalized_positions(self, coef=0.25):
+        x = self.position_x
+        z = self.position_z
+
+        if x > 0:
+            x -= coef
+        else:
+            x += coef
+
+        if z > 0:
+            z -= coef
+        else:
+            z += coef
+
+        return x, z

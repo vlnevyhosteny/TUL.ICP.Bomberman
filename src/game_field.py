@@ -244,7 +244,7 @@ class GameField(object):
         hit_npcs = []
 
         for npc in self.npc_figures:
-            if get_int_from_float(npc.position_x) == x and get_int_from_float(npc.position_z) == z:
+            if round(npc.position_x) == x and round(npc.position_z) == z:
                 hit_npcs.append(npc)
 
         return hit_npcs
@@ -323,6 +323,7 @@ class GameField(object):
                     self.player_figure.hit = True
 
             bomb.figure.placed_bombs -= 1
+            bomb.figure.escaping_to = None
 
             self.tracing_helper = TracingHelper(self)
 

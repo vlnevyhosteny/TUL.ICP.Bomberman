@@ -250,7 +250,8 @@ class Window(pyglet.window.Window):
         if x == -1:
             rounded_x = round(figure.position_x - distance)
 
-            if not self.model.check_if_figure_collide(rounded_x - coef, figure.position_z):
+            if not self.model.check_if_figure_collide(rounded_x - coef, figure.position_z) and \
+               not self.is_position_affected_by_any_bomb(rounded_x, figure.position_z):
                 figure.position_x -= distance
                 figure.recalculate_vertices()
             else:
@@ -259,7 +260,8 @@ class Window(pyglet.window.Window):
         if x == 1:
             rounded_x = round(figure.position_x + distance)
 
-            if not self.model.check_if_figure_collide(rounded_x + coef, figure.position_z):
+            if not self.model.check_if_figure_collide(rounded_x + coef, figure.position_z) and \
+               not self.is_position_affected_by_any_bomb(rounded_x, figure.position_z):
                 figure.position_x += distance
                 figure.recalculate_vertices()
             else:
@@ -268,7 +270,8 @@ class Window(pyglet.window.Window):
         if z == -1:
             rounded_z = round(figure.position_z - distance)
 
-            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - coef):
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - coef) and \
+               not self.is_position_affected_by_any_bomb(figure.position_x, rounded_z):
                 figure.position_z -= distance
                 figure.recalculate_vertices()
             else:
@@ -277,86 +280,88 @@ class Window(pyglet.window.Window):
         if z == 1:
             rounded_z = round(figure.position_z + distance)
 
-            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + coef):
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + coef) and \
+               not self.is_position_affected_by_any_bomb(figure.position_x, rounded_z):
                 figure.position_z += distance
                 figure.recalculate_vertices()
             else:
                 return self.npc_place_bomb(figure)
 
+    def is_position_affected_by_any_bomb(self, x, z):
+        for bomb in self.model.bombs:
+            if any(round(x) == position[0] and
+                   round(z) == position[1]
+                   for position in bomb.positions_affected_by_bomb):
+                return True
+
     def escape_with_figure(self, bomb, figure, distance):
-        if figure.previous_direction is not None:
-            x, z = figure.previous_direction
-            x *= distance
-            z *= distance
+        coef = 0
 
-            if not self.model.check_if_figure_collide(figure.position_x + x, figure.position_z + z):
-                figure.position_x += x
-                figure.position_z += z
-                figure.recalculate_vertices()
+        if figure.escaping_to is None:
+            figure.escaping_to = self.find_escape_location(bomb, figure)
+
+            if figure.escaping_to is None:
                 return True
+
+        path = self.model.tracing_helper.do_dijkstra((get_int_from_float(figure.position_x),
+                                                      0, get_int_from_float(figure.position_z)),
+                                                     figure.escaping_to)
+
+        x, z = self.model.tracing_helper.get_direction_from_path(path)
+
+        if x == 0 and z == 0:
+            if round(figure.position_x) != figure.escaping_to[0] or \
+               round(figure.position_z) != figure.escaping_to[2]:
+                x, z = figure.previous_direction
             else:
-                figure.previous_direction = None
+                return False
 
-        if get_int_from_float(figure.position_x) == bomb.position_x:
-            if not self.model.check_if_figure_collide(figure.position_x + 3 * distance, figure.position_z):
-                figure.position_x += distance
-                figure.recalculate_vertices()
+        figure.previous_direction = x, z
 
-                figure.previous_direction = 1, 0
-                return True
+        if x == -1:
+            rounded_x = round(figure.position_x - distance)
 
-            if not self.model.check_if_figure_collide(figure.position_x - 3 * distance, figure.position_z):
+            if not self.model.check_if_figure_collide(rounded_x - coef, figure.position_z):
                 figure.position_x -= distance
                 figure.recalculate_vertices()
-
-                figure.previous_direction = -1, 0
                 return True
 
-            if get_int_from_float(figure.position_z) >= bomb.position_z:
-                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + 3 * distance):
-                    figure.position_z += distance
-                    figure.recalculate_vertices()
+        if x == 1:
+            rounded_x = round(figure.position_x + distance)
 
-                    figure.previous_direction = 0, 1
-                    return True
-            else:
-                if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - 3 * distance):
-                    figure.position_z -= distance
-                    figure.recalculate_vertices()
-
-                    figure.previous_direction = 0, -1
-                    return True
-        else:
-            if not self.model.check_if_figure_collide(figure.position_x, figure.position_z + 3 * distance):
-                figure.position_z += distance
+            if not self.model.check_if_figure_collide(rounded_x + coef, figure.position_z):
+                figure.position_x += distance
                 figure.recalculate_vertices()
-
-                figure.previous_direction = 0, 1
                 return True
 
-            if not self.model.check_if_figure_collide(figure.position_x, figure.position_z - 3 * distance):
+        if z == -1:
+            rounded_z = round(figure.position_z - distance)
+
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z - coef):
                 figure.position_z -= distance
                 figure.recalculate_vertices()
-
-                figure.previous_direction = 0, -1
                 return True
 
-            if get_int_from_float(figure.position_x) >= bomb.position_x:
-                if not self.model.check_if_figure_collide(figure.position_x + 3 * distance, figure.position_z):
-                    figure.position_x += distance
-                    figure.recalculate_vertices()
+        if z == 1:
+            rounded_z = round(figure.position_z + distance)
 
-                    figure.previous_direction = 1, 0
-                    return True
-            else:
-                if not self.model.check_if_figure_collide(figure.position_x - 3 * distance, figure.position_z):
-                    figure.position_x -= distance
-                    figure.recalculate_vertices()
-
-                    figure.previous_direction = -1, 0
-                    return True
+            if not self.model.check_if_figure_collide(figure.position_x, rounded_z + coef):
+                figure.position_z += distance
+                figure.recalculate_vertices()
+                return True
 
         return False
+
+    def find_escape_location(self, bomb, figure):
+        for i in range(1, HALF_OF_FIELD_SIZE * 2, 1):
+            for dx in xrange(round(figure.position_x) - i, round(figure.position_x) + i, 1):
+                for dz in xrange(round(figure.position_z) - i, round(figure.position_z) + i, 1):
+                    if dx != bomb.position_x and dz != bomb.position_z and \
+                        not any(round(dx) == position[0] and
+                                round(dz) == position[1]
+                                for position in bomb.positions_affected_by_bomb):
+                        if not self.model.check_if_figure_collide(dx, dz):
+                            return dx, 0, dz
 
     def place_bombs(self):
         if self.player_wants_place_bomb and not self.game_stopped:
