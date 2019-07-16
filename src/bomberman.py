@@ -17,6 +17,8 @@ class Window(pyglet.window.Window):
         # Whether or not the window exclusively captures the mouse.
         self.exclusive = False
 
+        self.fullscreen_request = False
+
         # Strafing is moving lateral to the direction you are facing,
         # e.g. moving to the left or right while continuing to face forward.
         #
@@ -193,6 +195,10 @@ class Window(pyglet.window.Window):
         self.if_needed_rotate_horizontally()
         self.if_needed_rotate_vertically()
         self.if_needed_zoom()
+
+        if self.fullscreen_request:
+            self.set_fullscreen(not self.fullscreen)
+            self.fullscreen_request = False
 
         if self.reset_spectator:
             self.position = (STARTING_POSITION_X, STARTING_POSITION_Y, STARTING_POSITION_Z)
@@ -457,6 +463,9 @@ class Window(pyglet.window.Window):
         elif symbol == key.R:
             self.reset_spectator = True
 
+        elif symbol == key.F:
+            self.fullscreen_request = True
+
     def on_key_release(self, symbol, modifiers):
         """ Called when the player releases a key. See pyglet docs for key
         mappings.
@@ -584,7 +593,7 @@ def opengl_setup():
 
 
 def main():
-    window = Window(width=800, height=600, caption='Bomberman', resizable=True)
+    window = Window(width=800, height=600, caption='Bomberman', resizable=True, fullscreen=True)
     # Hide the mouse cursor and prevent the mouse from leaving the window.
     window.set_exclusive_mouse(True)
     opengl_setup()
