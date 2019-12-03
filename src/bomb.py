@@ -1,4 +1,5 @@
 from src.game_config import BOMB_STARTING_RANGE
+from src.basic_helpers import cube_vertices
 
 
 class Bomb:
@@ -8,8 +9,9 @@ class Bomb:
         self.position_z = position_z
         self.range = range
         self.timespan = timespan
-        self.gl_bomb = None
+        self.gl_object = None
         self.timer = None
+        self.active = False
         self.positions_affected_by_bomb = []
 
     def calculate_affection_of_bomb(self, _shown):
@@ -38,3 +40,7 @@ class Bomb:
                 self.positions_affected_by_bomb.append((self.position_x, i))
             else:
                 break
+
+    def recalculate_vertices(self):
+        if self.gl_object is not None:
+            self.gl_object.vertices = cube_vertices(self.position_x, 0, self.position_z, 0.25)

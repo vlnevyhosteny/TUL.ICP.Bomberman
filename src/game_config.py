@@ -44,3 +44,5 @@ TRACING_GRASS_CONSTANT = 5
 
 ambientLight = (GLfloat * 4)(0.2, 0.2, 0.2, 1.0)
 diffuseLight = (GLfloat * 4)(0.7, 0.7, 0.7, 1.0)
+
+INITIAL_BOMBS_COUNT = 1

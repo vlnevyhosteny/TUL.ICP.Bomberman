@@ -386,7 +386,6 @@ class Window(pyglet.window.Window):
             if new_bomb is not None:  # Can be None in case of unable to place bomb
                 new_bomb.calculate_affection_of_bomb(self.model._shown)
 
-                new_bomb.gl_bomb = self.model.draw_bomb(new_bomb)
                 new_bomb.timer = pyglet.clock.schedule_once(self.model.detonation, new_bomb.timespan)
                 self.model.bombs.append(new_bomb)
 
@@ -401,7 +400,6 @@ class Window(pyglet.window.Window):
 
                 figure.previous_direction = None
 
-                new_bomb.gl_bomb = self.model.draw_bomb(new_bomb)
                 new_bomb.timer = pyglet.clock.schedule_once(self.model.detonation, new_bomb.timespan)
                 self.model.bombs.append(new_bomb)
 

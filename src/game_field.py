@@ -107,6 +107,11 @@ class GameField(object):
             # create vertex list
             figure.gl_object = self.main_batch.add(24, GL_QUADS, self.group, ('v3f/dynamic', vertex_data), ('t2f/static', texture_data))
 
+            for bomb in figure.bombs:
+                vertex_data = cube_vertices(x, 0, z, 0.1)
+                texture_data = list(SAND)
+                bomb.gl_object = self.main_batch.add(24, GL_QUADS, self.group, ('v3f/dynamic', vertex_data), ('t2f/static', texture_data))
+
     def add_block(self, position, texture, immediate=True):
         """ Add a block with the given `texture` and `position` to the world.
 
@@ -324,10 +329,11 @@ class GameField(object):
 
             bomb.figure.placed_bombs -= 1
             bomb.figure.escaping_to = None
+            bomb.active = False
+
+            bomb.figure.reposition_not_active_bombs()
 
             self.tracing_helper = TracingHelper(self)
-
-            del bomb
 
     def draw_bomb(self, bomb):
         x, y, z = bomb.position_x, 1, bomb.position_z
