@@ -591,7 +591,7 @@ def opengl_setup():
 
 
 def main():
-    window = Window(width=800, height=600, caption='Bomberman', resizable=True, fullscreen=True)
+    window = Window(width=800, height=600, caption='Bomberman', resizable=True, fullscreen=False)
     # Hide the mouse cursor and prevent the mouse from leaving the window.
     window.set_exclusive_mouse(True)
     opengl_setup()
