@@ -8,11 +8,6 @@ from src.game_field import GameField
 from src.game_config import *
 from src.tracing_helper import TracingHelper
 
-from src.basic_helpers import m3d_rad_to_deg
-from src.game_config import STATIC_LIGHT_POSITION, SHADOW_WIDTH, SHADOW_HEIGHT
-
-from math import sqrt, atan
-
 
 class Window(pyglet.window.Window):
 
@@ -37,9 +32,6 @@ class Window(pyglet.window.Window):
         self.position = (STARTING_POSITION_X, STARTING_POSITION_Y, STARTING_POSITION_Z)
 
         self.spectator_distance_to_center = pythagoras_get_c(HALF_OF_FIELD_SIZE, HALF_OF_FIELD_SIZE)
-
-        self.strips = None
-        self.texture_matrix = M3DMatrix44f()
 
         # First element is rotation of the player in the x-z plane (ground
         # plane) measured from the z-axis down. The second is the rotation
@@ -74,8 +66,6 @@ class Window(pyglet.window.Window):
 
         self.status = pyglet.text.Label('', font_name='Arial', font_size=50, x=self.width//2, y=self.height//2,
                                         anchor_x='center', anchor_y='center', color=(0, 0, 0, 255))
-
-        self.regenerate_shadow_map()
 
         # This call schedules the `update()` method to be called
         # TICKS_PER_SEC. This is the main game event loop.
@@ -563,7 +553,6 @@ class Window(pyglet.window.Window):
         """
         self.clear()
         self.set_3d()
-
         glColor3d(1, 1, 1)
         self.model.main_batch.draw()
         self.model.bomb_batch.draw()
@@ -582,77 +571,6 @@ class Window(pyglet.window.Window):
 
         self.label.draw()
 
-    def regenerate_shadow_map(self):
-        global textureMatrix, strips
-        lightModelview = (GLfloat * 16)()
-        lightProjection = (GLfloat * 16)()
-        sceneBoundingRadius = 95.0  # based on objects in scene
-
-        # Save the depth precision for where it's useful
-        lightToSceneDistance = sqrt(STATIC_LIGHT_POSITION[0] * STATIC_LIGHT_POSITION[0] + STATIC_LIGHT_POSITION[1] *
-                                    STATIC_LIGHT_POSITION[1] + STATIC_LIGHT_POSITION[2] * STATIC_LIGHT_POSITION[2])
-        nearPlane = lightToSceneDistance - sceneBoundingRadius
-
-        # Keep the scene filling the depth texture
-        fieldOfView = m3d_rad_to_deg(2.0 * atan(sceneBoundingRadius / lightToSceneDistance))
-
-        # Switch to light's point of view
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        gluLookAt(STATIC_LIGHT_POSITION[0], STATIC_LIGHT_POSITION[1], STATIC_LIGHT_POSITION[2], 0.0, 0.0, 0.0, 0.0, 1.0,
-                  0.0)
-        glGetFloatv(GL_MODELVIEW_MATRIX, lightModelview)
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT)
-
-        # Clear the depth buffer only
-        glClear(GL_DEPTH_BUFFER_BIT)
-
-        # All we care about here is resulting depth values
-        glShadeModel(GL_FLAT)
-        glDisable(GL_LIGHTING)
-        glDisable(GL_COLOR_MATERIAL)
-        glDisable(GL_NORMALIZE)
-        glColorMask(0, 0, 0, 0)
-
-        # Overcome imprecision
-        glEnable(GL_POLYGON_OFFSET_FILL)
-
-        # Draw objects in the scene except base plane
-        # which never shadows anything
-        self.set_3d()
-        glColor3d(1, 1, 1)
-        self.model.main_batch.draw()
-        self.model.bomb_batch.draw()
-
-        # Copy depth values into depth texture
-        #glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 0, 0, SHADOW_WIDTH, SHADOW_HEIGHT, 0)
-
-        # Restore normal drawing state
-        glShadeModel(GL_SMOOTH)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_COLOR_MATERIAL)
-        glEnable(GL_NORMALIZE)
-        glColorMask(1, 1, 1, 1)
-        glDisable(GL_POLYGON_OFFSET_FILL)
-
-        # Set up texture matrix for shadow map projection,
-        # which will be rolled into the eye linear
-        # texture coordinate generation plane equations
-        tempMatrix = M3DMatrix44f()
-        m3d_load_identity44(tempMatrix)
-        m3d_translate_matrix44(tempMatrix, 0.5, 0.5, 0.5)
-        m3d_scale_matrix44(tempMatrix, 0.5, 0.5, 0.5)
-        m3d_matrix_multiply44(self.texture_matrix, tempMatrix, lightProjection)
-        m3d_matrix_multiply44(tempMatrix, self.texture_matrix, lightModelview)
-
-        # transpose to get the s, t, r, and q rows for plane equations
-        m3d_transpose_matrix44(self.texture_matrix, tempMatrix)
-        # this seems sorta awkward, but I haven't hit on a better way to index into the array in a fashion that
-        # pyglet will work with.
-        self.strips = [(GLfloat * 4)(self.texture_matrix[4], self.texture_matrix[5], self.texture_matrix[6], self.texture_matrix[7]),
-                  (GLfloat * 4)(self.texture_matrix[8], self.texture_matrix[9], self.texture_matrix[10], self.texture_matrix[11]),
-                  (GLfloat * 4)(self.texture_matrix[12], self.texture_matrix[13], self.texture_matrix[14], self.texture_matrix[15]),]
-
 
 def opengl_setup():
     """ Basic OpenGL configuration.
@@ -663,29 +581,30 @@ def opengl_setup():
     # Enable culling (not rendering) of back-facing facets -- facets that aren't
     # visible to you.
     glEnable(GL_CULL_FACE)
-
-    # Set up some lighting state that never changes
-    glShadeModel(GL_SMOOTH)
-    glEnable(GL_LIGHTING)
-    glEnable(GL_COLOR_MATERIAL)
-    glEnable(GL_NORMALIZE)
-    glEnable(GL_LIGHT0)
-
-    glBindTexture(GL_TEXTURE_2D, GLuint(0))
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     # Set the texture minification/magnification function to GL_NEAREST (nearest
     # in Manhattan distance) to the specified texture coordinates. GL_NEAREST
     # "is generally faster than GL_LINEAR, but it can produce textured images
     # with sharper edges because the transition between texture elements is not
     # as smooth."
+
+    # glEnable(GL_NORMALIZE)
+    #
+    # glMaterialfv(GL_FRONT, GL_AMBIENT, vec(0, 0, 0, 1.0))
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, vec(0.7, 0.7, 0.7, 0.0))
+    #
+    # glLightfv(GL_LIGHT0, GL_POSITION, vec(0.0, 8.0, -0.5, 0))
+    # glEnable(GL_LIGHTING)
+    # glEnable(GL_LIGHT0)
+    #
+    # glLightfv(GL_LIGHT1, GL_AMBIENT, vec(0, 0, 0, 1.0))
+    # glLightfv(GL_LIGHT1, GL_SPECULAR, vec(0.6, 0.6, 0.6, 1.0))
+    # glLightfv(GL_LIGHT1, GL_DIFFUSE, vec(0.7, 0.7, 0.7, 0.0))
+    # glLightfv(GL_LIGHT1, GL_POSITION, vec(5.0, 5.0, 10.0, 0))
+
+    # glShadeModel(GL_SMOOTH)
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
-    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
-    glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
-    glTexGeni(GL_Q, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
 
 
 def main():
