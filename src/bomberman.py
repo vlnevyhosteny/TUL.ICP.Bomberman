@@ -586,12 +586,29 @@ def opengl_setup():
     # "is generally faster than GL_LINEAR, but it can produce textured images
     # with sharper edges because the transition between texture elements is not
     # as smooth."
+
+    # glEnable(GL_NORMALIZE)
+    #
+    # glMaterialfv(GL_FRONT, GL_AMBIENT, vec(0, 0, 0, 1.0))
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, vec(0.7, 0.7, 0.7, 0.0))
+    #
+    # glLightfv(GL_LIGHT0, GL_POSITION, vec(0.0, 8.0, -0.5, 0))
+    # glEnable(GL_LIGHTING)
+    # glEnable(GL_LIGHT0)
+    #
+    # glLightfv(GL_LIGHT1, GL_AMBIENT, vec(0, 0, 0, 1.0))
+    # glLightfv(GL_LIGHT1, GL_SPECULAR, vec(0.6, 0.6, 0.6, 1.0))
+    # glLightfv(GL_LIGHT1, GL_DIFFUSE, vec(0.7, 0.7, 0.7, 0.0))
+    # glLightfv(GL_LIGHT1, GL_POSITION, vec(5.0, 5.0, 10.0, 0))
+
+    # glShadeModel(GL_SMOOTH)
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
 
 def main():
-    window = Window(width=800, height=600, caption='Bomberman', resizable=True, fullscreen=False)
+    window = Window(width=800, height=600, caption='Bomberman', resizable=True, fullscreen=True)
     # Hide the mouse cursor and prevent the mouse from leaving the window.
     window.set_exclusive_mouse(True)
     opengl_setup()

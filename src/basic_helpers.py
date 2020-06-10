@@ -1,6 +1,7 @@
 import math
 
 from past.builtins import xrange
+from pyglet.gl import GLfloat
 
 from src.game_config import *
 
@@ -136,3 +137,6 @@ def get_positions_list():
             result.append((x, y, z))
 
     return result
+
+def vec(*args):
+    return (GLfloat * len(args))(*args)
